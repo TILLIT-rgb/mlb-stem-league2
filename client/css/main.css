@@ -1,0 +1,31 @@
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--navy:#0f1d33;--navy2:#162744;--field:#1a5e35;--gold:#e8b93c;--blue:#2a7de1;--red:#c43c2d;--slate:#1e2d45;--card:#1c2f4a;--light:#ecf0f1;--dim:#8899aa}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--navy);color:var(--light);min-height:100vh;overflow-x:hidden}
+.screen{display:none;min-height:100vh;padding:20px;animation:fadeIn .3s}
+.screen.active{display:flex;flex-direction:column;align-items:center}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+h1{font-family:Georgia,serif;color:var(--gold);text-align:center;margin-bottom:12px}
+h2{font-family:Georgia,serif;color:var(--gold);font-size:1.2em;margin-bottom:10px}
+button{cursor:pointer;border:none;border-radius:6px;padding:10px 22px;font-size:1em;font-weight:600;transition:all .2s}
+button:hover{transform:translateY(-1px);filter:brightness(1.1)}
+button:disabled{opacity:.4;cursor:default;transform:none}
+.btn-gold{background:var(--gold);color:#111}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-red{background:var(--red);color:#fff}
+.btn-sm{padding:6px 14px;font-size:.85em}
+input{background:var(--slate);border:2px solid #334;color:var(--light);border-radius:6px;padding:10px 14px;font-size:1em;width:100%}
+input:focus{outline:none;border-color:var(--gold)}
+.mt10{margin-top:10px}.mb10{margin-bottom:10px}
+.hidden{display:none!important}
+.result-overlay{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;z-index:100;pointer-events:none;opacity:0}
+.result-overlay.show{animation:resultAnim .8s ease-out forwards}
+@keyframes resultAnim{0%{opacity:0;transform:scale(.3)}20%{opacity:1;transform:scale(1.1)}40%{transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:translateY(-40px)}}
+.result-overlay .ro-text{font-size:3em;font-weight:900;font-family:Georgia,serif;text-shadow:0 4px 20px rgba(0,0,0,.5);text-align:center}
+.wc-overlay{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;z-index:101;pointer-events:none;opacity:0}
+.wc-overlay.show{animation:wcPlayAnim 1s ease-out forwards}
+@keyframes wcPlayAnim{0%{opacity:0;transform:scale(.2)}15%{opacity:1;transform:scale(1.1)}30%{transform:scale(1)}75%{opacity:1}100%{opacity:0;transform:translateY(-30px)}}
+.wc-play-card{background:var(--card);border:3px solid var(--gold);border-radius:16px;padding:24px 36px;text-align:center;box-shadow:0 0 60px rgba(232,185,60,.4)}
+.wc-play-card .wpc-icon{font-size:3em}
+.wc-play-card .wpc-name{font-size:1.3em;font-weight:700;margin-top:6px}
+.wc-play-card .wpc-desc{color:var(--dim);font-size:.85em;margin-top:4px}
+.confetti-piece{position:fixed;width:8px;height:8px;z-index:200;pointer-events:none}

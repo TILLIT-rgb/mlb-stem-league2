@@ -1,0 +1,43 @@
+#draft{padding-top:10px}
+.draft-header{text-align:center;margin-bottom:12px;width:100%}
+.draft-turn{font-size:1.1em;margin-bottom:6px}
+.draft-turn .tn{font-weight:700;font-size:1.2em}
+.draft-picks-left{color:var(--dim);font-size:.85em}
+.draft-body{display:flex;gap:14px;width:100%;max-width:1200px}
+.draft-rosters{width:220px;flex-shrink:0;display:flex;flex-direction:column;gap:10px;position:sticky;top:10px;align-self:flex-start;max-height:90vh;overflow-y:auto}
+.roster-panel{background:var(--navy2);border-radius:10px;padding:12px;border:2px solid transparent}
+.roster-panel.active{border-color:var(--gold);box-shadow:0 0 15px rgba(232,185,60,.25)}
+.roster-panel h3{font-size:.9em;margin-bottom:8px}
+.roster-list{font-size:.8em;color:var(--dim)}
+.roster-list .ri{display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid #1a2a40}
+.roster-list .ri span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.roster-list .ri .rpos{color:var(--gold);font-size:.75em}
+.draft-pool{flex:1;min-width:0}
+.filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.filter-bar button{padding:5px 12px;font-size:.8em;background:var(--slate);color:var(--dim);border-radius:20px}
+.filter-bar button.active{background:var(--gold);color:#111}
+.pool-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.pcard{background:linear-gradient(135deg,var(--card),#1a2844);border-radius:10px;padding:10px;cursor:pointer;border:2px solid #2a3a55;transition:all .2s;position:relative;overflow:hidden}
+.pcard::before{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.04),transparent);transition:left .4s}
+.pcard:hover::before{left:100%}
+.pcard:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 4px 16px rgba(232,185,60,.15)}
+.pcard.picked{opacity:.3;pointer-events:none}
+.pcard.locked{opacity:.35;pointer-events:none;border-color:#c43c2d}
+.pcard.locked .locked-label{display:block}
+.locked-label{display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-12deg);background:rgba(196,60,45,.85);color:#fff;font-size:.7em;font-weight:700;padding:4px 12px;border-radius:4px;text-transform:uppercase;letter-spacing:1px;z-index:2;white-space:nowrap}
+.pcard .pcard-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.pcard .pname{font-weight:700;font-size:.85em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard .ppos{color:var(--gold);font-size:.75em}
+.pcard .pstats{display:flex;gap:8px;font-size:.7em;color:var(--dim)}
+.pcard .pstats span b{color:var(--light)}
+.pcard canvas.mini-wheel{width:60px;height:60px;margin:4px auto;display:block}
+.pcard .pitch-nums{font-size:.7em;margin-top:4px}
+.pcard .pitch-nums .pn-label{color:var(--dim);font-size:.65em}
+.pcard .pitch-nums .pn-vals{display:flex;flex-wrap:wrap;gap:3px;margin-top:2px}
+.pcard .pitch-nums .pn-chip{background:var(--slate);padding:1px 5px;border-radius:3px;font-size:.7em}
+.pcard .pitch-nums .pn-chip.mul{border-left:2px solid var(--blue)}
+.pcard .pitch-nums .pn-chip.add{border-left:2px solid var(--red)}
+.draft-done-wrap{text-align:center;margin-top:16px}
+.type-tabs{display:flex;gap:6px;margin-bottom:10px}
+.type-tabs button{padding:6px 16px;font-size:.85em;background:var(--slate);color:var(--dim);border-radius:8px}
+.type-tabs button.active{background:var(--field);color:#fff}

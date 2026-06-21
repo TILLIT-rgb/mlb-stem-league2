@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MLB STEM League — Online</title>
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/draft.css">
+<link rel="stylesheet" href="css/lineup.css">
+<link rel="stylesheet" href="css/game.css">
+<style>
+/* Game-phase specific styles */
+#game{padding-top:10px}
+.game-wrap{max-width:900px;width:100%;margin:0 auto}
+.scoreboard{background:linear-gradient(135deg,#1a2e1a,#162222);border-radius:10px;padding:12px;margin-bottom:14px;overflow-x:auto;border:2px solid #2a4a2a}
+.sb-table{width:100%;border-collapse:collapse;font-size:.8em;text-align:center;min-width:500px}
+.sb-table th,.sb-table td{padding:4px 6px;border:1px solid #1a2a40}
+.sb-table th{color:var(--dim);font-weight:400;font-size:.75em}
+.sb-table .team-name{text-align:left;font-weight:700;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-table .current-inn{background:var(--gold);color:#111;font-weight:700}
+.sb-table .total{font-weight:700;background:var(--slate)}
+.game-status{text-align:center;color:var(--dim);font-size:.85em;margin-bottom:10px}
+.game-status b{color:var(--light)}
+.phase-panel{background:linear-gradient(180deg,var(--navy2),#0f1d33);border-radius:12px;padding:20px;margin-bottom:14px;position:relative;border:1px solid #2a3a55}
+.phase-label{position:absolute;top:10px;right:14px;font-size:.7em;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase}
+.phase-label.off{background:var(--blue);color:#fff}
+.phase-label.def{background:var(--red);color:#fff}
+.batter-info,.pitcher-info{display:flex;gap:16px;align-items:center;margin-bottom:14px}
+.player-avatar{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.3em;flex-shrink:0}
+.player-detail h3{font-size:1.1em}
+.player-detail .pd-pos{color:var(--gold);font-size:.8em}
+.player-detail .pd-stats{color:var(--dim);font-size:.8em;margin-top:2px}
+.wheel-area{display:flex;flex-direction:column;align-items:center;margin:10px 0}
+.wheel-container{position:relative;width:280px;height:280px;margin-bottom:10px}
+.wheel-container canvas{width:280px;height:280px}
+.wheel-pointer{position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-top:22px solid var(--gold);z-index:2;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}
+.spin-result{font-size:1.4em;font-weight:700;min-height:36px;text-align:center}
+.dice-area{display:flex;flex-direction:column;align-items:center;gap:12px;margin:14px 0}
+.dice-row{display:flex;align-items:center;gap:14px}
+.die{width:60px;height:60px;background:var(--slate);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.8em;font-weight:700;border:2px solid #2a3a55;transition:all .1s}
+.die.rolling{animation:diceShake .1s infinite}
+@keyframes diceShake{0%,100%{transform:rotate(0)}25%{transform:rotate(-5deg)}75%{transform:rotate(5deg)}}
+.dice-op{font-size:1.5em;font-weight:700;color:var(--gold);min-width:30px;text-align:center}
+.dice-result-text{font-size:.9em;color:var(--dim);text-align:center;min-height:20px}
+.dice-btns{display:flex;gap:10px}
+.pitch-numbers{display:flex;gap:16px;margin:10px 0;flex-wrap:wrap}
+.pitch-num-group{display:flex;flex-direction:column;gap:4px}
+.pitch-num-group .png-label{font-size:.7em;color:var(--dim);text-transform:uppercase}
+.pitch-num-group .png-chips{display:flex;flex-wrap:wrap;gap:3px}
+.pitch-num-group .pchip{padding:3px 7px;border-radius:4px;font-size:.8em;font-weight:600}
+.pchip.mul{background:#1a3a5c;border:1px solid var(--blue)}
+.pchip.add{background:#3c1a1a;border:1px solid var(--red)}
+.pchip.matched{background:var(--gold);color:#111;animation:chipPulse .6s ease-in-out}
+@keyframes chipPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.shift-area{display:flex;gap:8px;align-items:center;justify-content:center;margin:10px 0}
+.shift-area button{padding:8px 16px}
+.reminder-bar{background:var(--slate);border-radius:6px;padding:8px 14px;text-align:center;font-size:.9em;margin:8px 0}
+.action-btns{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.bases-display{display:flex;justify-content:center;margin:10px 0}
+.diamond{position:relative;width:120px;height:120px}
+.base{position:absolute;width:20px;height:20px;background:var(--slate);border:2px solid #3a4a60;transform:rotate(45deg)}
+.base.occupied{background:var(--gold);border-color:var(--gold);box-shadow:0 0 8px rgba(232,185,60,.6)}
+.base.b1{right:6px;top:50%;margin-top:-10px}
+.base.b2{left:50%;top:6px;margin-left:-10px}
+.base.b3{left:6px;top:50%;margin-top:-10px}
+.home-plate{position:absolute;bottom:6px;left:50%;margin-left:-8px;width:16px;height:16px;background:#555;clip-path:polygon(50% 0%,100% 30%,100% 70%,50% 100%,0% 70%,0% 30%)}
+.outs-display{text-align:center;margin:6px 0;font-size:.85em;color:var(--dim)}
+.outs-display .out-dot{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--slate);margin:0 3px;border:1px solid #3a4a60}
+.outs-display .out-dot.active{background:var(--red);border-color:var(--red)}
+.wc-section{margin-top:14px;border-top:1px solid #1a2a40;padding-top:12px}
+.wc-section h4{font-size:.85em;color:var(--dim);margin-bottom:8px}
+.wc-hand{display:flex;gap:8px;flex-wrap:wrap}
+.wc-card{background:linear-gradient(135deg,var(--card),#152238);border-radius:8px;padding:8px 12px;font-size:.75em;cursor:default;border:2px solid #2a3a55;transition:all .2s;min-width:100px;text-align:center}
+.wc-card .wc-icon{font-size:1.5em;margin-bottom:2px}
+.wc-card .wc-name{font-weight:700;margin-bottom:2px;font-size:.9em}
+.wc-card .wc-type{font-size:.65em;padding:1px 6px;border-radius:10px;display:inline-block;margin-bottom:3px}
+.wc-card .wc-type.bat{background:var(--blue)}
+.wc-card .wc-type.pitch{background:var(--red)}
+.wc-card .wc-desc{color:var(--dim);font-size:.75em;line-height:1.2}
+.wc-card.playable{border-color:var(--gold);cursor:pointer;animation:wcGlow 1.5s ease-in-out infinite}
+.wc-card.playable:hover{transform:translateY(-4px);box-shadow:0 6px 20px rgba(232,185,60,.3)}
+.wc-card .tap-label{display:none;color:var(--gold);font-size:.7em;font-weight:700;margin-top:4px}
+.wc-card.playable .tap-label{display:block}
+@keyframes wcGlow{0%,100%{box-shadow:0 0 5px rgba(232,185,60,.2)}50%{box-shadow:0 0 20px rgba(232,185,60,.5)}}
+.game-over-panel{background:linear-gradient(135deg,var(--navy2),#1a3352);border:3px solid var(--gold);border-radius:16px;padding:30px;text-align:center;max-width:500px;width:100%;margin:40px auto;box-shadow:0 0 40px rgba(232,185,60,.2)}
+.game-over-panel h1{font-size:2em;margin-bottom:6px}
+.game-over-panel .final-score{font-size:2.5em;font-weight:900;margin:14px 0}
+</style>
+</head>
+<body>
+
+<!-- SETUP / LOBBY SCREEN -->
+<div id="setup" class="screen active">
+  <div class="setup-box">
+    <div class="logo">⚾</div>
+    <h1>MLB STEM League</h1>
+    <p>Online Multiplayer</p>
+    <div class="setup-inputs">
+      <div class="team-input">
+        <div class="dot" style="background:var(--blue)"></div>
+        <input id="t1name" placeholder="Your team name" value="Blue Jays">
+      </div>
+    </div>
+    <div class="setup-actions">
+      <button class="btn-gold" onclick="createRoom()">Create Room</button>
+      <div class="setup-divider">— or join a room —</div>
+      <div class="room-code-input">
+        <input id="roomCodeInput" placeholder="CODE" maxlength="4">
+        <input id="t2name" placeholder="Your team name" value="Red Sox" style="display:none">
+        <button class="btn-blue" onclick="joinRoom()">Join</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WAITING FOR OPPONENT SCREEN -->
+<div id="waiting" class="screen">
+  <div class="waiting-box">
+    <div class="logo">⚾</div>
+    <h1>Room Created</h1>
+    <p>Share this code with your opponent:</p>
+    <div class="room-code-display" id="waitingCode">----</div>
+    <p class="pulse" style="color:var(--dim)">Waiting for opponent to join...</p>
+  </div>
+</div>
+
+<!-- DRAFT SCREEN -->
+<div id="draft" class="screen">
+  <div class="draft-header">
+    <h1 style="font-size:1.4em">Player Draft</h1>
+    <div class="draft-turn" id="draftTurn"></div>
+    <div class="draft-picks-left" id="draftPicksLeft"></div>
+  </div>
+  <div class="draft-body">
+    <div class="draft-rosters" id="draftRosters"></div>
+    <div class="draft-pool">
+      <div class="type-tabs" id="typeTabs">
+        <button class="active" onclick="setPoolType('bat')">Batters</button>
+        <button onclick="setPoolType('pitch')">Pitchers</button>
+      </div>
+      <div class="filter-bar" id="filterBar"></div>
+      <div class="pool-grid" id="poolGrid"></div>
+      <div class="draft-done-wrap hidden" id="draftDoneWrap">
+        <button class="btn-gold" id="draftDoneBtn" onclick="goToLineup()" disabled>Set Lineups →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LINEUP SCREEN -->
+<div id="lineup" class="screen">
+  <div class="lineup-wrap">
+    <h1>Set Batting Orders</h1>
+    <div id="lineupTeams"></div>
+    <div style="text-align:center;margin-top:16px">
+      <button class="btn-gold" id="readyBtn" onclick="playerReady()">Ready! ⚾</button>
+    </div>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="game" class="screen">
+  <div class="game-wrap">
+    <div class="scoreboard" id="scoreboard"></div>
+    <div class="game-status" id="gameStatus"></div>
+    <div id="gamePhase"></div>
+  </div>
+</div>
+
+<!-- OVERLAYS -->
+<div class="result-overlay" id="resultOverlay"><div class="ro-text" id="resultText"></div></div>
+<div class="wc-overlay" id="wcOverlay"><div class="wc-play-card" id="wcPlayCard"></div></div>
+
+<!-- SHARED DATA (batters/pitchers/wildcards for client rendering) -->
+<script>
+function genDeg(ba,obp,slg){const hbpR=0.008,bbR=Math.max(0.02,(obp-ba)/(1-ba)-hbpR),abR=1-bbR-hbpR;const hitR=ba*abR,tbR=slg*abR,xb=(tbR-hitR)*360;let hr=Math.round(xb/5.2),trip=Math.max(0,Math.round(hr*0.1)),dbl=Math.round(xb-2*trip-3*hr);if(dbl<0)dbl=0;let sin=Math.round(hitR*360)-dbl-trip-hr;if(sin<0)sin=0;let bb=Math.round(bbR*360),hbp=Math.round(hbpR*360),so=Math.round((0.20+(0.260-ba)*0.3)*360);if(so<20)so=20;let rem=360-sin-dbl-trip-hr-bb-hbp-so;if(rem<0){so+=rem;rem=0;if(so<10){so=10;rem=360-sin-dbl-trip-hr-bb-hbp-so}}let go=Math.round(rem*0.56),fo=rem-go;if(fo<0){fo=0;go=rem}return[sin,dbl,trip,hr,bb,hbp,so,fo,go]}
+const BATTERS=[{n:"William Contreras",p:["C"],ba:.260,obp:.355,slg:.399,deg:[56,15,0,9,46,3,66,72,93]},{n:"Seiya Suzuki",p:["OF","DH"],ba:.245,obp:.326,slg:.478},{n:"Jacob Wilson",p:["SS"],ba:.311,obp:.355,slg:.444},{n:"Isaac Collins",p:["OF","2B"],ba:.263,obp:.368,slg:.411},{n:"Corbin Carroll",p:["OF"],ba:.259,obp:.343,slg:.541},{n:"Mike Trout",p:["DH","OF"],ba:.232,obp:.359,slg:.439},{n:"Hunter Goodman",p:["C","DH"],ba:.278,obp:.323,slg:.520},{n:"Zach Neto",p:["SS"],ba:.257,obp:.319,slg:.474},{n:"Jazz Chisholm Jr.",p:["2B"],ba:.242,obp:.332,slg:.481},{n:"Mookie Betts",p:["SS","OF"],ba:.258,obp:.326,slg:.406},{n:"Julio Rodriguez",p:["OF"],ba:.267,obp:.324,slg:.474},{n:"Salvador Perez",p:["C","1B"],ba:.236,obp:.284,slg:.446},{n:"Ketel Marte",p:["3B","2B","DH"],ba:.283,obp:.376,slg:.517},{n:"Curtis Mead",p:["2B","3B"],ba:.233,obp:.299,slg:.321},{n:"Kyle Stowers",p:["OF"],ba:.288,obp:.368,slg:.544},{n:"Adley Rutschman",p:["C","DH"],ba:.220,obp:.307,slg:.366},{n:"CJ Abrams",p:["SS"],ba:.257,obp:.315,slg:.433},{n:"Matt Olson",p:["1B"],ba:.272,obp:.366,slg:.484},{n:"Isaac Paredes",p:["3B"],ba:.254,obp:.352,slg:.458},{n:"Ronald Acuna Jr.",p:["OF"],ba:.250,obp:.360,slg:.500},{n:"Alejandro Kirk",p:["C"],ba:.265,obp:.340,slg:.380},{n:"Marcus Semien",p:["2B","SS"],ba:.272,obp:.340,slg:.470},{n:"Elly De La Cruz",p:["SS"],ba:.240,obp:.300,slg:.480},{n:"Isiah Kiner-Falefa",p:["3B","SS"],ba:.275,obp:.320,slg:.370},{n:"Bryce Harper",p:["1B","DH"],ba:.285,obp:.380,slg:.530},{n:"Willson Contreras",p:["C","DH"],ba:.260,obp:.345,slg:.450},{n:"Steven Kwan",p:["OF"],ba:.295,obp:.370,slg:.420},{n:"James Wood",p:["OF"],ba:.250,obp:.330,slg:.440},{n:"Logan O'Hoppe",p:["C"],ba:.244,obp:.310,slg:.420},{n:"Josh Jung",p:["3B"],ba:.262,obp:.320,slg:.480},{n:"Alex Call",p:["OF"],ba:.230,obp:.340,slg:.350},{n:"Cal Raleigh",p:["C"],ba:.232,obp:.310,slg:.480},{n:"Vladimir Guerrero Jr.",p:["1B"],ba:.290,obp:.370,slg:.530},{n:"Junior Caminero",p:["3B","SS"],ba:.260,obp:.310,slg:.440},{n:"Pete Crow-Armstrong",p:["OF"],ba:.240,obp:.300,slg:.400},{n:"Pete Alonso",p:["1B"],ba:.240,obp:.330,slg:.490},{n:"Corey Seager",p:["SS"],ba:.275,obp:.350,slg:.500},{n:"Edmundo Sosa",p:["SS","2B","3B"],ba:.255,obp:.300,slg:.380},{n:"Roman Anthony",p:["OF"],ba:.260,obp:.350,slg:.450},{n:"Aaron Judge",p:["OF","DH"],ba:.270,obp:.390,slg:.570},{n:"Jackson Chourio",p:["OF"],ba:.255,obp:.310,slg:.440},{n:"Willy Adames",p:["SS"],ba:.260,obp:.340,slg:.460},{n:"Rafael Devers",p:["3B"],ba:.280,obp:.360,slg:.510},{n:"Freddie Freeman",p:["1B"],ba:.290,obp:.380,slg:.500}];
+BATTERS.forEach(b=>{if(!b.deg)b.deg=genDeg(b.ba,b.obp,b.slg)});
+const PITCHERS=[{n:"Michael Wacha",mul:[7,10,15,20,24,60,70],add:[5,7,13,19]},{n:"Yoshinobu Yamamoto",mul:[8,12,18,24,32,40,45,54,63,70],add:[2,5,10,12,15,20]},{n:"Ryan Walker",mul:[7,9,14,18,21,36,42],add:[2,3,6,7,17]},{n:"Michael King",mul:[4,9,12,16,27,36,64,81],add:[3,11,14,20]},{n:"Shota Imanaga",mul:[14,16,27,30,36,45,56,63],add:[3,5,8,16,19]},{n:"Bryan Woo",mul:[6,10,16,27,30,36,40,50,63],add:[3,6,10,14,19,20]},{n:"Pablo Lopez",mul:[8,12,20,24,32,45,56,80],add:[7,9,14,19,20]},{n:"Sean Manaea",mul:[6,8,12,21,25,35,49],add:[2,6,14,18,19]},{n:"Yusei Kikuchi",mul:[6,10,14,20,28,35,42,56],add:[4,7,11,15,18]},{n:"Paul Skenes",mul:[9,16,18,24,30,36,48,54,72],add:[3,6,9,12,16,18]},{n:"Jesus Luzardo",mul:[8,15,21,28,35,42,48],add:[4,8,13,17]},{n:"Aaron Nola",mul:[6,12,18,24,30,42,56,63],add:[3,7,11,14,18]},{n:"Yu Darvish",mul:[9,14,18,25,32,40,48,54,72],add:[2,5,9,13,16,19]},{n:"Jonathan Loaisiga",mul:[8,12,16,24,36,48],add:[4,8,12,16]},{n:"Yuki Matsui",mul:[6,10,15,21,28,42,56],add:[3,7,11,15,19]},{n:"Jacob deGrom",mul:[8,12,16,20,25,30,36,45,54,63,72,81],add:[2,4,6,8,10,12,14,16,18]},{n:"Jacob Misiorowski",mul:[9,14,21,28,42],add:[5,9,14]},{n:"Tarik Skubal",mul:[8,12,18,24,32,40,48,56,63],add:[3,6,9,12,15,18]}];
+const WILD_CARD_DEFS=[{name:"Stolen Base",icon:"🏃",type:"bat",desc:"Runner on 1st/2nd advances one base",canPlay:(gs,t)=>t==='pre'&&(gs.bases[0]||gs.bases[1])},{name:"Double Steal",icon:"🏃‍♂️",type:"bat",desc:"Runners on 1st AND 2nd both advance",canPlay:(gs,t)=>t==='pre'&&gs.bases[0]&&gs.bases[1]},{name:"Stealing Home",icon:"🏠",type:"bat",desc:"Runner on 3rd scores",canPlay:(gs,t)=>t==='pre'&&gs.bases[2]},{name:"Safe on Error",icon:"❌",type:"bat",desc:"On GO/FO: batter to 1st, runners advance 1",canPlay:(gs,t)=>t==='post'&&(gs.lastResult==='GO'||gs.lastResult==='FO')},{name:"Sacrifice Bunt",icon:"🤏",type:"bat",desc:"<2 outs, runner on 1st: batter out, runners advance",canPlay:(gs,t)=>t==='pre'&&gs.outs<2&&gs.bases[0]},{name:"Suicide Squeeze",icon:"💨",type:"bat",desc:"<2 outs, runner on 3rd: batter out, runner scores",canPlay:(gs,t)=>t==='pre'&&gs.outs<2&&gs.bases[2]},{name:"Catcher's Interference",icon:"🧤",type:"bat",desc:"Batter to 1st, forced runners advance",canPlay:(gs,t)=>t==='pre'},{name:"Passed Ball",icon:"⚾",type:"bat",desc:"On SO with 1st open: batter to 1st",canPlay:(gs,t)=>t==='post'&&gs.lastResult==='SO'&&!gs.bases[0]},{name:"Wild Pitch",icon:"🌀",type:"bat",desc:"Runner on 1st/2nd advances one base",canPlay:(gs,t)=>t==='pre'&&(gs.bases[0]||gs.bases[1])},{name:"Pitcher Balk",icon:"⚠️",type:"bat",desc:"Runner on 1st/2nd advances one base",canPlay:(gs,t)=>t==='pre'&&(gs.bases[0]||gs.bases[1])},{name:"Intentional Walk",icon:"👉",type:"pitch",desc:"Batter to 1st, forced runners advance",canPlay:(gs,t)=>t==='pre'},{name:"Double Play",icon:"✌️",type:"pitch",desc:"Runner on 1st, <2 outs, GO: both out",canPlay:(gs,t)=>t==='post'&&gs.lastResult==='GO'&&gs.bases[0]&&gs.outsBeforePlay<2},{name:"Force Out",icon:"👊",type:"pitch",desc:"Runner on 1st + GO: lead runner out",canPlay:(gs,t)=>t==='post'&&gs.lastResult==='GO'&&gs.bases[0]},{name:"Triple Play",icon:"🔥",type:"pitch",desc:"1st+2nd occupied, 0 outs, GO: all three out",canPlay:(gs,t)=>t==='post'&&gs.lastResult==='GO'&&gs.bases[0]&&gs.bases[1]&&gs.outsBeforePlay===0},{name:"Caught Stealing",icon:"🚫",type:"pitch",desc:"After stolen base: stealing runner is out",canPlay:(gs,t)=>t==='post'&&gs.lastWCWasSteal},{name:"Outfield Assist",icon:"💪",type:"pitch",desc:"Runner on 3rd, <2 outs, FO: runner out",canPlay:(gs,t)=>t==='post'&&gs.lastResult==='FO'&&gs.bases[2]&&gs.outsBeforePlay<2},{name:"Pitcher Pick-Off",icon:"🎯",type:"pitch",desc:"Runner on 1st/2nd: lead runner out",canPlay:(gs,t)=>t==='pre'&&(gs.bases[0]||gs.bases[1])}];
+</script>
+
+<!-- Socket.IO client library (served by the server) -->
+<script src="/socket.io/socket.io.js"></script>
+
+<!-- Client modules -->
+<script src="js/utils/constants.js"></script>
+<script src="js/utils/helpers.js"></script>
+<script src="js/state/clientState.js"></script>
+<script src="js/render/wheel.js"></script>
+<script src="js/render/scoreboard.js"></script>
+<script src="js/render/cards.js"></script>
+<script src="js/render/field.js"></script>
+<script src="js/screens/setup.js"></script>
+<script src="js/screens/draft.js"></script>
+<script src="js/screens/lineup.js"></script>
+<script src="js/screens/game.js"></script>
+<script src="js/socket.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
