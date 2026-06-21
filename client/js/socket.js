@@ -2,8 +2,40 @@
 let socket;
 
 function initSocket() {
-  // Connect to server (same origin in production)
   socket = io();
+
+  // === CONNECTION STATUS ===
+  socket.on('connect', () => {
+    console.log('Connected to server');
+    const createBtn = document.getElementById('createRoomBtn');
+    const joinBtn = document.getElementById('joinRoomBtn');
+    const status = document.getElementById('connectionStatus');
+    if (createBtn) createBtn.disabled = false;
+    if (joinBtn) joinBtn.disabled = false;
+    if (status) status.style.display = 'none';
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Disconnected from server');
+    const createBtn = document.getElementById('createRoomBtn');
+    const joinBtn = document.getElementById('joinRoomBtn');
+    const status = document.getElementById('connectionStatus');
+    if (createBtn) createBtn.disabled = true;
+    if (joinBtn) joinBtn.disabled = true;
+    if (status) {
+      status.textContent = 'Reconnecting to server...';
+      status.style.display = 'block';
+    }
+  });
+
+  socket.on('connect_error', () => {
+    console.log('Connection error, retrying...');
+    const status = document.getElementById('connectionStatus');
+    if (status) {
+      status.textContent = 'Connecting to server... (free tier may take up to 60s)';
+      status.style.display = 'block';
+    }
+  });
 
   // === LOBBY EVENTS ===
   socket.on('roomCreated', ({ roomCode, slot }) => {
@@ -22,7 +54,6 @@ function initSocket() {
   });
 
   socket.on('playerJoined', ({ teams, playerCount }) => {
-    // Both players connected
   });
 
   // === DRAFT EVENTS ===
@@ -40,9 +71,7 @@ function initSocket() {
 
   socket.on('draftComplete', (draftState) => {
     updateDraftUI(draftState);
-    // Auto-transition to lineup screen
     setTimeout(() => {
-      // Initialize lineups from batters
       clientState.draftState.teams.forEach(t => {
         if (!t.lineup || t.lineup.length === 0) t.lineup = [...t.batters];
         if (t.activePitcher === undefined) t.activePitcher = 0;
@@ -67,7 +96,6 @@ function initSocket() {
   });
 
   socket.on('playerReady', ({ slot }) => {
-    // Show ready indicator
   });
 
   socket.on('gameStart', ({ gameState }) => {
@@ -77,8 +105,6 @@ function initSocket() {
   // === GAME EVENTS ===
   socket.on('spinResult', (data) => {
     clientState.gameState = data.gameState;
-
-    // Animate the wheel
     const b = data.batter;
     if (b && b.deg) {
       let mid = 0;
@@ -90,7 +116,6 @@ function initSocket() {
       if (delta < 30) delta += 360;
       const extraSpins = 4 + Math.floor(Math.random() * 3);
       clientState.wheelRot += delta + extraSpins * 360;
-
       const wh = document.getElementById('gameWheel');
       if (wh) wh.style.transform = `rotate(${clientState.wheelRot}deg)`;
     }
@@ -99,7 +124,6 @@ function initSocket() {
       document.getElementById('spinResult').innerHTML =
         `<span style="color:${OUTCOME_COLORS[data.outcomeIdx]}">${OUTCOME_LABELS[data.outcomeIdx]}!</span>`;
       fireResultAnim(data.outcome, data.outcomeIdx);
-
       setTimeout(() => {
         const bt = clientState.gameState.half;
         const isBatter = clientState.playerSlot === bt;
@@ -120,8 +144,6 @@ function initSocket() {
     const d1 = document.getElementById('die1');
     document.getElementById('diceOpDisplay').textContent = data.op === 'mul' ? '×' : '+';
     document.getElementById('diceBtns').innerHTML = '';
-
-    // Animate dice rolling
     if (d0) d0.classList.add('rolling');
     if (d1) d1.classList.add('rolling');
     let count = 0;
@@ -147,11 +169,8 @@ function initSocket() {
       const rightIdx = ci < OUTCOME_KEYS.length - 1 ? ci + 1 : 0;
       const ft = 1 - clientState.gameState.half;
       const isFielding = clientState.playerSlot === ft;
-
-      // Highlight matched chip
       const chip = document.getElementById((data.op === 'mul' ? 'mul' : 'add') + data.result);
       if (chip) chip.classList.add('matched');
-
       if (isFielding) {
         document.getElementById('shiftArea').innerHTML = `
           <div style="text-align:center;color:var(--gold);font-weight:700;margin-bottom:6px">Match! Choose shift direction:</div>
@@ -210,7 +229,6 @@ function initSocket() {
   });
 
   socket.on('opponentReconnected', () => {
-    // Opponent back
   });
 
   socket.on('reconnected', ({ roomCode, slot, phase, gameState }) => {
