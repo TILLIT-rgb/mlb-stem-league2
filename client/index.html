@@ -102,12 +102,12 @@
       </div>
     </div>
     <div class="setup-actions">
-      <button class="btn-gold" onclick="createRoom()">Create Room</button>
+      <p class="pulse" id="connectionStatus" style="color:var(--gold);font-size:.85em">Connecting to server...</p> <button class="btn-gold" id="createRoomBtn" onclick="createRoom()" disabled>Create Room</button>
       <div class="setup-divider">— or join a room —</div>
       <div class="room-code-input">
         <input id="roomCodeInput" placeholder="CODE" maxlength="4">
         <input id="t2name" placeholder="Your team name" value="Red Sox" style="display:none">
-        <button class="btn-blue" onclick="joinRoom()">Join</button>
+        <button class="btn-blue" id="joinRoomBtn" onclick="joinRoom()" disabled>Join</button>
       </div>
     </div>
   </div>
