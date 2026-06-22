@@ -148,8 +148,8 @@ function initSocket() {
     if (d1) d1.classList.add('rolling');
     let count = 0;
     const rollInterval = setInterval(() => {
-      if (d0) d0.textContent = Math.floor(Math.random() * 10);
-      if (d1) d1.textContent = Math.floor(Math.random() * 10);
+      if (d0) d0.textContent = Math.floor(Math.random() * 9) + 1;
+      if (d1) d1.textContent = Math.floor(Math.random() * 9) + 1;
       count++;
       if (count > 15) {
         clearInterval(rollInterval);
