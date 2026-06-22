@@ -81,8 +81,8 @@ function spinWheel(gs) {
 function rollDice(gs, op) {
   if (gs.diceDone) return null;
   gs.diceOp = op;
-  const v0 = Math.floor(Math.random() * 10);
-  const v1 = Math.floor(Math.random() * 10);
+  const v0 = Math.floor(Math.random() * 9) + 1;
+  const v1 = Math.floor(Math.random() * 9) + 1;
   gs.diceVals = [v0, v1];
   gs.diceResult = op === 'mul' ? v0 * v1 : v0 + v1;
   gs.diceDone = true;
