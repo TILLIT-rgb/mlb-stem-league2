@@ -10,13 +10,13 @@ const io = new Server(server, {
   cors: { origin: '*' }
 });
 
-// Serve static client files
 app.use(express.static(path.join(__dirname, '..', 'client')));
 
 const lobbyHandler = require('./sockets/lobby');
 const draftHandler = require('./sockets/draft');
 const lineupHandler = require('./sockets/lineup');
 const gameHandler = require('./sockets/game');
+const derbyHandler = require('./sockets/derby');
 
 io.on('connection', (socket) => {
   console.log(`Player connected: ${socket.id}`);
@@ -25,6 +25,7 @@ io.on('connection', (socket) => {
   draftHandler(io, socket);
   lineupHandler(io, socket);
   gameHandler(io, socket);
+  derbyHandler(io, socket);
 
   socket.on('disconnect', () => {
     console.log(`Player disconnected: ${socket.id}`);
@@ -36,10 +37,8 @@ io.on('connection', (socket) => {
         message: 'Opponent disconnected. Waiting for reconnection...'
       });
 
-      // 5-minute timeout for forfeit
       setTimeout(() => {
         const current = findRoomBySocketId(socket.id);
-        // If player hasn't reconnected (socket ID still matches old one)
         if (!current) {
           const r = getRoom(room.code);
           if (r && r.players.find(p => p.socketId === socket.id)) {
