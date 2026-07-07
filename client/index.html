@@ -8,6 +8,8 @@
 <link rel="stylesheet" href="css/draft.css">
 <link rel="stylesheet" href="css/lineup.css">
 <link rel="stylesheet" href="css/game.css">
+<link rel="stylesheet" href="css/derby.css">
+
 <style>
 /* Game-phase specific styles */
 #game{padding-top:10px}
@@ -102,7 +104,7 @@
       </div>
     </div>
     <div class="setup-actions">
-      <p class="pulse" id="connectionStatus" style="color:var(--gold);font-size:.85em">Connecting to server...</p> <button class="btn-gold" id="createRoomBtn" onclick="createRoom()" disabled>Create Room</button>
+      <p class="pulse" id="connectionStatus" style="color:var(--gold);font-size:.85em">Connecting to server...</p> <div class="mode-select">         <button class="btn-gold" id="createRoomBtn" onclick="createRoom()" disabled>⚾ Full Game</button>         <button class="btn-red" id="createDerbyBtn" onclick="createDerbyRoom()" disabled>💣 Home Run Derby</button>       </div>
       <div class="setup-divider">— or join a room —</div>
       <div class="room-code-input">
         <input id="roomCodeInput" placeholder="CODE" maxlength="4">
@@ -157,6 +159,47 @@
     </div>
   </div>
 </div>
+<!-- DERBY CONFIG SCREEN -->
+<div id="derbyConfig" class="screen">
+  <div class="derby-config-box">
+    <div class="logo">💣</div>
+    <h1>Home Run Derby</h1>
+    <p>How many batters per team?</p>
+    <div class="participant-selector">
+      <button class="btn-blue" id="derbyMinus" onclick="changeDerbyCount(-1)">−</button>
+      <div>
+        <div class="participant-count" id="derbyParticipantCount">3</div>
+        <div class="participant-label">batters each</div>
+      </div>
+      <button class="btn-red" id="derbyPlus" onclick="changeDerbyCount(1)">+</button>
+    </div>
+    <p style="color:var(--dim);font-size:.8em;margin:12px 0">Each batter gets 20 swings. Homer on your last swing? Keep going until you miss!</p>
+    <p id="derbyConfigStatus" style="color:var(--dim);font-size:.85em"></p>
+    <button class="btn-gold" id="derbyStartBtn" onclick="startDerbyDraft()" style="margin-top:12px">Start Draft →</button>
+  </div>
+</div>
+
+<!-- DERBY DRAFT SCREEN -->
+<div id="derbyDraft" class="screen">
+  <div class="derby-draft-wrap">
+    <div class="derby-draft-header">
+      <h1>💣 Derby Draft</h1>
+      <div class="derby-draft-turn" id="derbyDraftTurn"></div>
+      <div style="color:var(--dim);font-size:.85em" id="derbyDraftProgress"></div>
+    </div>
+    <div class="derby-draft-rosters" id="derbyDraftRosters"></div>
+    <div class="derby-pool" id="derbyDraftPool"></div>
+  </div>
+</div>
+
+<!-- DERBY GAME SCREEN -->
+<div id="derby" class="screen">
+  <div class="derby-wrap">
+    <div class="derby-scoreboard" id="derbyScoreboard"></div>
+    <div class="derby-status" id="derbyStatus"></div>
+    <div id="derbyBatterPanel"></div>
+  </div>
+</div>
 
 <!-- GAME SCREEN -->
 <div id="game" class="screen">
@@ -195,6 +238,7 @@ const WILD_CARD_DEFS=[{name:"Stolen Base",icon:"🏃",type:"bat",desc:"Runner on
 <script src="js/screens/draft.js"></script>
 <script src="js/screens/lineup.js"></script>
 <script src="js/screens/game.js"></script>
+<script src="js/screens/derby.js"></script>
 <script src="js/socket.js"></script>
 <script src="js/app.js"></script>
 
