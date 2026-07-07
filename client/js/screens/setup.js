@@ -11,6 +11,15 @@ function createRoom() {
   socket.emit('createRoom', { teamName });
 }
 
+function createDerbyRoom() {
+  if (!socket || !socket.connected) {
+    alert('Still connecting to server... Please wait a moment and try again.');
+    return;
+  }
+  const teamName = document.getElementById('t1name').value || 'Team 1';
+  socket.emit('createDerbyRoom', { teamName });
+}
+
 function joinRoom() {
   if (!socket || !socket.connected) {
     alert('Still connecting to server... Please wait a moment and try again.');
