@@ -1,17 +1,17 @@
-// Socket.IO client connection and event handlers
 let socket;
 
 function initSocket() {
   socket = io();
 
-  // === CONNECTION STATUS ===
   socket.on('connect', () => {
     console.log('Connected to server');
     const createBtn = document.getElementById('createRoomBtn');
     const joinBtn = document.getElementById('joinRoomBtn');
     const status = document.getElementById('connectionStatus');
+    const derbyBtn = document.getElementById('createDerbyBtn');
     if (createBtn) createBtn.disabled = false;
     if (joinBtn) joinBtn.disabled = false;
+    if (derbyBtn) derbyBtn.disabled = false;
     if (status) status.style.display = 'none';
   });
 
@@ -19,9 +19,11 @@ function initSocket() {
     console.log('Disconnected from server');
     const createBtn = document.getElementById('createRoomBtn');
     const joinBtn = document.getElementById('joinRoomBtn');
+    const derbyBtn = document.getElementById('createDerbyBtn');
     const status = document.getElementById('connectionStatus');
     if (createBtn) createBtn.disabled = true;
     if (joinBtn) joinBtn.disabled = true;
+    if (derbyBtn) derbyBtn.disabled = true;
     if (status) {
       status.textContent = 'Reconnecting to server...';
       status.style.display = 'block';
@@ -37,26 +39,26 @@ function initSocket() {
     }
   });
 
-  // === LOBBY EVENTS ===
-  socket.on('roomCreated', ({ roomCode, slot }) => {
+  socket.on('roomCreated', ({ roomCode, slot, mode }) => {
     clientState.roomCode = roomCode;
     clientState.playerSlot = slot;
+    clientState.gameMode = mode || 'game';
     showWaitingRoom(roomCode);
   });
 
-  socket.on('joinedRoom', ({ roomCode, slot, teams }) => {
+  socket.on('joinedRoom', ({ roomCode, slot, teams, mode }) => {
     clientState.roomCode = roomCode;
     clientState.playerSlot = slot;
+    clientState.gameMode = mode || 'game';
   });
 
   socket.on('joinError', ({ reason }) => {
     alert('Could not join: ' + reason);
   });
 
-  socket.on('playerJoined', ({ teams, playerCount }) => {
+  socket.on('playerJoined', ({ teams, playerCount, mode }) => {
   });
 
-  // === DRAFT EVENTS ===
   socket.on('startDraft', ({ teams }) => {
     showDraftScreen(teams);
   });
@@ -81,7 +83,6 @@ function initSocket() {
     }, 1000);
   });
 
-  // === LINEUP EVENTS ===
   socket.on('lineupUpdated', ({ slot, lineup }) => {
     if (clientState.draftState) {
       clientState.draftState.teams[slot].lineup = lineup;
@@ -102,7 +103,6 @@ function initSocket() {
     showGameScreen(gameState);
   });
 
-  // === GAME EVENTS ===
   socket.on('spinResult', (data) => {
     clientState.gameState = data.gameState;
     const b = data.batter;
@@ -223,7 +223,53 @@ function initSocket() {
     renderGamePhase();
   });
 
+  // === DERBY EVENTS ===
+
+  socket.on('derbyConfigStart', ({ teams }) => {
+    showDerbyConfig();
+  });
+
+  socket.on('derbyParticipantsSet', ({ count }) => {
+    derbyParticipants = count;
+    renderDerbyConfig();
+  });
+
+  socket.on('derbyDraftStart', (data) => {
+    showDerbyDraftScreen(data);
+  });
+
+  socket.on('derbyDraftUpdated', (data) => {
+    clientState.derbyDraftData = data;
+    renderDerbyDraft();
+  });
+
+  socket.on('derbyStart', ({ derbyState }) => {
+    showDerbyScreen(derbyState);
+  });
+
+  socket.on('derbySwingResult', (data) => {
+    handleDerbySwingResult(data);
+  });
+
+  socket.on('derbyNextBatter', ({ derbyState }) => {
+    clientState.derbyState = derbyState;
+    derbyWheelRot = 0;
+    renderDerby();
+  });
+
+  socket.on('derbySwingReady', ({ derbyState }) => {
+    clientState.derbyState = derbyState;
+    renderDerby();
+  });
+
+  socket.on('derbyOver', ({ derbyState, winner }) => {
+    clientState.derbyState = derbyState;
+    clientState.derbyState.derbyOver = true;
+    renderDerby();
+  });
+
   // === DISCONNECT/RECONNECT ===
+
   socket.on('playerDisconnected', ({ message }) => {
     alert(message);
   });
@@ -231,12 +277,15 @@ function initSocket() {
   socket.on('opponentReconnected', () => {
   });
 
-  socket.on('reconnected', ({ roomCode, slot, phase, gameState }) => {
+  socket.on('reconnected', ({ roomCode, slot, phase, gameState, mode, derbyState }) => {
     clientState.roomCode = roomCode;
     clientState.playerSlot = slot;
     clientState.gameState = gameState;
+    clientState.gameMode = mode || 'game';
     if (phase === 'game') {
       showGameScreen(gameState);
+    } else if (phase === 'derby' && derbyState) {
+      showDerbyScreen(derbyState);
     } else if (phase === 'draft') {
       showScreen('draft');
     } else if (phase === 'lineup') {
