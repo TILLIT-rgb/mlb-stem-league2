@@ -6,6 +6,7 @@ module.exports = function(io, socket) {
     const room = createRoom();
     const playerName = (data && data.teamName) || 'Team 1';
     room.host = socket.id;
+    room.mode = 'game';
     room.players.push({
       socketId: socket.id,
       slot: 0,
@@ -24,6 +25,29 @@ module.exports = function(io, socket) {
     socket.roomCode = room.code;
     socket.playerSlot = 0;
     socket.emit('roomCreated', { roomCode: room.code, slot: 0 });
+  });
+
+  socket.on('createDerbyRoom', (data) => {
+    const room = createRoom();
+    const playerName = (data && data.teamName) || 'Team 1';
+    room.host = socket.id;
+    room.mode = 'derby';
+    room.players.push({
+      socketId: socket.id,
+      slot: 0,
+      teamName: playerName,
+      ready: false
+    });
+    room.gameState = {
+      teams: [
+        { name: playerName, batters: [] },
+        { name: '', batters: [] }
+      ]
+    };
+    socket.join(room.code);
+    socket.roomCode = room.code;
+    socket.playerSlot = 0;
+    socket.emit('roomCreated', { roomCode: room.code, slot: 0, mode: 'derby' });
   });
 
   socket.on('joinRoom', ({ roomCode, teamName }) => {
@@ -45,20 +69,25 @@ module.exports = function(io, socket) {
     socket.roomCode = roomCode;
     socket.playerSlot = 1;
 
-    socket.emit('joinedRoom', { roomCode, slot: 1, teams: room.gameState.teams.map(t => t.name) });
+    socket.emit('joinedRoom', { roomCode, slot: 1, teams: room.gameState.teams.map(t => t.name), mode: room.mode });
     io.to(roomCode).emit('playerJoined', {
       teams: room.gameState.teams.map(t => t.name),
-      playerCount: room.players.length
+      playerCount: room.players.length,
+      mode: room.mode
     });
 
-    // Auto-start draft when 2 players
     if (room.players.length === 2) {
-      room.phase = 'draft';
-      io.to(roomCode).emit('startDraft', {
-        teams: room.gameState.teams.map(t => t.name)
-      });
-      // Send initial draft state so the pool renders
-      io.to(roomCode).emit('draftUpdated', getDraftState(room.gameState));
+      if (room.mode === 'derby') {
+        io.to(roomCode).emit('derbyConfigStart', {
+          teams: room.gameState.teams.map(t => t.name)
+        });
+      } else {
+        room.phase = 'draft';
+        io.to(roomCode).emit('startDraft', {
+          teams: room.gameState.teams.map(t => t.name)
+        });
+        io.to(roomCode).emit('draftUpdated', getDraftState(room.gameState));
+      }
     }
   });
 
@@ -78,7 +107,9 @@ module.exports = function(io, socket) {
       roomCode,
       slot: playerSlot,
       phase: room.phase,
-      gameState: room.gameState
+      gameState: room.gameState,
+      mode: room.mode,
+      derbyState: room.derbyState || null
     });
     socket.to(roomCode).emit('opponentReconnected');
   });
