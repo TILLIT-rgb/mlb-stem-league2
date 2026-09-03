@@ -1,5 +1,8 @@
 function renderLineups() {
-  const gs = clientState.gameState || (clientState.draftState && { teams: clientState.draftState.teams.map(t => ({
+   const gs = clientState.gameState || (clientState.draftState && { teams: clientState.draftState.teams.map(t => ({
+    ...t, lineup: t.lineup ? [...t.lineup] : [...t.batters], activePitcher: t.activePitcher || 0
+  }))});
+
     ...t, lineup: [...t.batters], activePitcher: 0
   }))});
   if (!gs) return;
