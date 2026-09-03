@@ -25,7 +25,7 @@ function initSocket() {
     if (joinBtn) joinBtn.disabled = true;
     if (derbyBtn) derbyBtn.disabled = true;
     if (status) {
-      status.textContent = 'Reconnecting to server...';
+      status.textContent = t('reconnecting');
       status.style.display = 'block';
     }
   });
@@ -34,7 +34,7 @@ function initSocket() {
     console.log('Connection error, retrying...');
     const status = document.getElementById('connectionStatus');
     if (status) {
-      status.textContent = 'Connecting to server... (free tier may take up to 60s)';
+      status.textContent = t('connecting_free');
       status.style.display = 'block';
     }
   });
@@ -53,7 +53,7 @@ function initSocket() {
   });
 
   socket.on('joinError', ({ reason }) => {
-    alert('Could not join: ' + reason);
+    alert(t('could_not_join') + reason);
   });
 
   socket.on('playerJoined', ({ teams, playerCount, mode }) => {
@@ -74,9 +74,9 @@ function initSocket() {
   socket.on('draftComplete', (draftState) => {
     updateDraftUI(draftState);
     setTimeout(() => {
-      clientState.draftState.teams.forEach(t => {
-        if (!t.lineup || t.lineup.length === 0) t.lineup = [...t.batters];
-        if (t.activePitcher === undefined) t.activePitcher = 0;
+      clientState.draftState.teams.forEach(tm => {
+        if (!tm.lineup || tm.lineup.length === 0) tm.lineup = [...tm.batters];
+        if (tm.activePitcher === undefined) tm.activePitcher = 0;
       });
       showScreen('lineup');
       renderLineups();
@@ -122,17 +122,17 @@ function initSocket() {
 
     setTimeout(() => {
       document.getElementById('spinResult').innerHTML =
-        `<span style="color:${OUTCOME_COLORS[data.outcomeIdx]}">${OUTCOME_LABELS[data.outcomeIdx]}!</span>`;
+        `<span style="color:${OUTCOME_COLORS[data.outcomeIdx]}">${outcomeLabel(data.outcomeIdx)}${LANG === 'ja' ? '！' : '!'}</span>`;
       fireResultAnim(data.outcome, data.outcomeIdx);
       setTimeout(() => {
         const bt = clientState.gameState.half;
         const isBatter = clientState.playerSlot === bt;
         if (isBatter) {
           document.getElementById('offenseActions').innerHTML =
-            `<button class="btn-red" onclick="emitToDefense()">Defense Turn →</button>`;
+            `<button class="btn-red" onclick="emitToDefense()">${t('defense_turn')}</button>`;
         } else {
           document.getElementById('offenseActions').innerHTML =
-            `<div style="color:var(--dim)">Waiting for opponent...</div>`;
+            `<div style="color:var(--dim)">${t('waiting_opp')}</div>`;
         }
       }, 600);
     }, 3200);
@@ -173,19 +173,19 @@ function initSocket() {
       if (chip) chip.classList.add('matched');
       if (isFielding) {
         document.getElementById('shiftArea').innerHTML = `
-          <div style="text-align:center;color:var(--gold);font-weight:700;margin-bottom:6px">Match! Choose shift direction:</div>
+          <div style="text-align:center;color:var(--gold);font-weight:700;margin-bottom:6px">${t('match_choose')}</div>
           <div class="shift-area">
             <button class="btn-sm btn-blue" onclick="emitShift(-1)">← ${OUTCOME_KEYS[leftIdx]}</button>
-            <button class="btn-sm btn-gold" onclick="emitShift(0)">Keep ${OUTCOME_KEYS[ci]}</button>
+            <button class="btn-sm btn-gold" onclick="emitShift(0)">${fmtKeep(OUTCOME_KEYS[ci])}</button>
             <button class="btn-sm btn-red" onclick="emitShift(1)">→ ${OUTCOME_KEYS[rightIdx]}</button>
           </div>`;
       } else {
         document.getElementById('shiftArea').innerHTML =
-          `<div style="text-align:center;color:var(--gold);margin:8px 0">Match! Opponent is choosing shift...</div>`;
+          `<div style="text-align:center;color:var(--gold);margin:8px 0">${t('match_opp')}</div>`;
       }
     } else {
       document.getElementById('shiftArea').innerHTML =
-        `<div style="text-align:center;color:var(--dim);margin:8px 0">No match — no shift available</div>`;
+        `<div style="text-align:center;color:var(--dim);margin:8px 0">${t('no_match')}</div>`;
       showApplyUI();
     }
   }
@@ -194,7 +194,7 @@ function initSocket() {
     clientState.gameState = gameState;
     const idx = gameState.lastResultIdx;
     document.getElementById('shiftArea').innerHTML =
-      `<div style="text-align:center;color:var(--gold);font-weight:700;margin:8px 0">Result: ${OUTCOME_LABELS[idx]}</div>`;
+      `<div style="text-align:center;color:var(--gold);font-weight:700;margin:8px 0">${t('result_label')}${outcomeLabel(idx)}</div>`;
     showApplyUI();
   });
 
@@ -206,7 +206,7 @@ function initSocket() {
   socket.on('resultApplied', ({ runsScored, gameState, gameOver }) => {
     clientState.gameState = gameState;
     if (runsScored > 0) {
-      fireResultAnim(`+${runsScored} RUN${runsScored > 1 ? 'S' : ''}!`, -1, true);
+      fireResultAnim(fmtRuns(runsScored), -1, true);
     }
     setTimeout(() => renderGamePhase(), runsScored > 0 ? 800 : 300);
   });
@@ -295,7 +295,7 @@ function initSocket() {
   });
 
   socket.on('forfeit', ({ disconnectedSlot, winner }) => {
-    alert(`Opponent forfeited. ${clientState.playerSlot === winner ? 'You win!' : 'You lose.'}`);
+    alert(fmtForfeit(clientState.playerSlot === winner));
   });
 }
 
@@ -304,9 +304,9 @@ function showApplyUI() {
   const isFielding = clientState.playerSlot === ft;
   if (isFielding) {
     document.getElementById('defenseActions').innerHTML =
-      `<button class="btn-gold" onclick="emitApplyResult()">Apply Result</button>`;
+      `<button class="btn-gold" onclick="emitApplyResult()">${t('apply_result')}</button>`;
   } else {
     document.getElementById('defenseActions').innerHTML =
-      `<div style="color:var(--dim)">Waiting for opponent to apply...</div>`;
+      `<div style="color:var(--dim)">${t('waiting_apply')}</div>`;
   }
 }

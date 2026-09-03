@@ -9,7 +9,6 @@
 <link rel="stylesheet" href="css/lineup.css">
 <link rel="stylesheet" href="css/game.css">
 <link rel="stylesheet" href="css/derby.css">
-
 <style>
 /* Game-phase specific styles */
 #game{padding-top:10px}
@@ -87,127 +86,133 @@
 .game-over-panel{background:linear-gradient(135deg,var(--navy2),#1a3352);border:3px solid var(--gold);border-radius:16px;padding:30px;text-align:center;max-width:500px;width:100%;margin:40px auto;box-shadow:0 0 40px rgba(232,185,60,.2)}
 .game-over-panel h1{font-size:2em;margin-bottom:6px}
 .game-over-panel .final-score{font-size:2.5em;font-weight:900;margin:14px 0}
+/* Language toggle button */
+#langToggle{position:fixed;top:10px;right:10px;z-index:1000;background:var(--slate,#243447);color:#fff;border:1px solid var(--gold,#e8b93c);border-radius:20px;padding:6px 14px;font-size:.85em;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+#langToggle:hover{background:var(--gold,#e8b93c);color:#111}
 </style>
 </head>
 <body>
+<!-- LANGUAGE TOGGLE -->
+<button id="langToggle" onclick="toggleLang()" aria-label="Switch language">🌐 <span id="langBtnLabel">日本語</span></button>
 
 <!-- SETUP / LOBBY SCREEN -->
 <div id="setup" class="screen active">
-  <div class="setup-box">
-    <div class="logo">⚾</div>
-    <h1>MLB STEM League</h1>
-    <p>Online Multiplayer</p>
-    <div class="setup-inputs">
-      <div class="team-input">
-        <div class="dot" style="background:var(--blue)"></div>
-        <input id="t1name" placeholder="Your team name" value="Blue Jays">
-      </div>
-    </div>
-    <div class="setup-actions">
-      <p class="pulse" id="connectionStatus" style="color:var(--gold);font-size:.85em">Connecting to server...</p> <div class="mode-select">         <button class="btn-gold" id="createRoomBtn" onclick="createRoom()" disabled>⚾ Full Game</button>         <button class="btn-red" id="createDerbyBtn" onclick="createDerbyRoom()" disabled>💣 Home Run Derby</button>       </div>
-      <div class="setup-divider">— or join a room —</div>
-      <div class="room-code-input">
-        <input id="roomCodeInput" placeholder="CODE" maxlength="4">
-        <input id="t2name" placeholder="Your team name" value="Red Sox" style="display:none">
-        <button class="btn-blue" id="joinRoomBtn" onclick="joinRoom()" disabled>Join</button>
-      </div>
-    </div>
-  </div>
+<div class="setup-box">
+<div class="logo">⚾</div>
+<h1 data-i18n="brand">MLB STEM League</h1>
+<p data-i18n="subtitle_online">Online Multiplayer</p>
+<div class="setup-inputs">
+<div class="team-input">
+<div class="dot" style="background:var(--blue)"></div>
+<input id="t1name" data-i18n-ph="ph_teamname" placeholder="Your team name" value="Blue Jays">
+</div>
+</div>
+<div class="setup-actions">
+<p class="pulse" id="connectionStatus" data-i18n="connecting" style="color:var(--gold);font-size:.85em">Connecting to server...</p> <div class="mode-select">         <button class="btn-gold" id="createRoomBtn" onclick="createRoom()" data-i18n="btn_full_game" disabled>⚾ Full Game</button>         <button class="btn-red" id="createDerbyBtn" onclick="createDerbyRoom()" data-i18n="btn_derby" disabled>💣 Home Run Derby</button>       </div>
+<div class="setup-divider" data-i18n="or_join">— or join a room —</div>
+<div class="room-code-input">
+<input id="roomCodeInput" data-i18n-ph="ph_code" placeholder="CODE" maxlength="4">
+<input id="t2name" placeholder="Your team name" value="Red Sox" style="display:none">
+<button class="btn-blue" id="joinRoomBtn" onclick="joinRoom()" data-i18n="btn_join" disabled>Join</button>
+</div>
+</div>
+</div>
 </div>
 
 <!-- WAITING FOR OPPONENT SCREEN -->
 <div id="waiting" class="screen">
-  <div class="waiting-box">
-    <div class="logo">⚾</div>
-    <h1>Room Created</h1>
-    <p>Share this code with your opponent:</p>
-    <div class="room-code-display" id="waitingCode">----</div>
-    <p class="pulse" style="color:var(--dim)">Waiting for opponent to join...</p>
-  </div>
+<div class="waiting-box">
+<div class="logo">⚾</div>
+<h1 data-i18n="room_created">Room Created</h1>
+<p data-i18n="share_code">Share this code with your opponent:</p>
+<div class="room-code-display" id="waitingCode">----</div>
+<p class="pulse" data-i18n="waiting_join" style="color:var(--dim)">Waiting for opponent to join...</p>
+</div>
 </div>
 
 <!-- DRAFT SCREEN -->
 <div id="draft" class="screen">
-  <div class="draft-header">
-    <h1 style="font-size:1.4em">Player Draft</h1>
-    <div class="draft-turn" id="draftTurn"></div>
-    <div class="draft-picks-left" id="draftPicksLeft"></div>
-  </div>
-  <div class="draft-body">
-    <div class="draft-rosters" id="draftRosters"></div>
-    <div class="draft-pool">
-      <div class="type-tabs" id="typeTabs">
-        <button class="active" onclick="setPoolType('bat')">Batters</button>
-        <button onclick="setPoolType('pitch')">Pitchers</button>
-      </div>
-      <div class="filter-bar" id="filterBar"></div>
-      <div class="pool-grid" id="poolGrid"></div>
-      <div class="draft-done-wrap hidden" id="draftDoneWrap">
-        <button class="btn-gold" id="draftDoneBtn" onclick="goToLineup()" disabled>Set Lineups →</button>
-      </div>
-    </div>
-  </div>
+<div class="draft-header">
+<h1 data-i18n="player_draft" style="font-size:1.4em">Player Draft</h1>
+<div class="draft-turn" id="draftTurn"></div>
+<div class="draft-picks-left" id="draftPicksLeft"></div>
+</div>
+<div class="draft-body">
+<div class="draft-rosters" id="draftRosters"></div>
+<div class="draft-pool">
+<div class="type-tabs" id="typeTabs">
+<button class="active" onclick="setPoolType('bat')" data-i18n="tab_batters">Batters</button>
+<button onclick="setPoolType('pitch')" data-i18n="tab_pitchers">Pitchers</button>
+</div>
+<div class="filter-bar" id="filterBar"></div>
+<div class="pool-grid" id="poolGrid"></div>
+<div class="draft-done-wrap hidden" id="draftDoneWrap">
+<button class="btn-gold" id="draftDoneBtn" onclick="goToLineup()" data-i18n="set_lineups" disabled>Set Lineups →</button>
+</div>
+</div>
+</div>
 </div>
 
 <!-- LINEUP SCREEN -->
 <div id="lineup" class="screen">
-  <div class="lineup-wrap">
-    <h1>Set Batting Orders</h1>
-    <div id="lineupTeams"></div>
-    <div style="text-align:center;margin-top:16px">
-      <button class="btn-gold" id="readyBtn" onclick="playerReady()">Ready! ⚾</button>
-    </div>
-  </div>
+<div class="lineup-wrap">
+<h1 data-i18n="set_orders">Set Batting Orders</h1>
+<div id="lineupTeams"></div>
+<div style="text-align:center;margin-top:16px">
+<button class="btn-gold" id="readyBtn" onclick="playerReady()" data-i18n="ready">Ready! ⚾</button>
 </div>
+</div>
+</div>
+
 <!-- DERBY CONFIG SCREEN -->
 <div id="derbyConfig" class="screen">
-  <div class="derby-config-box">
-    <div class="logo">💣</div>
-    <h1>Home Run Derby</h1>
-    <p>How many batters per team?</p>
-    <div class="participant-selector">
-      <button class="btn-blue" id="derbyMinus" onclick="changeDerbyCount(-1)">−</button>
-      <div>
-        <div class="participant-count" id="derbyParticipantCount">3</div>
-        <div class="participant-label">batters each</div>
-      </div>
-      <button class="btn-red" id="derbyPlus" onclick="changeDerbyCount(1)">+</button>
-    </div>
-    <p style="color:var(--dim);font-size:.8em;margin:12px 0">Each batter gets 20 swings. Homer on your last swing? Keep going until you miss!</p>
-    <p id="derbyConfigStatus" style="color:var(--dim);font-size:.85em"></p>
-    <button class="btn-gold" id="derbyStartBtn" onclick="startDerbyDraft()" style="margin-top:12px">Start Draft →</button>
-  </div>
+<div class="derby-config-box">
+<div class="logo">💣</div>
+<h1 data-i18n="hr_derby">Home Run Derby</h1>
+<p data-i18n="how_many">How many batters per team?</p>
+<div class="participant-selector">
+<button class="btn-blue" id="derbyMinus" onclick="changeDerbyCount(-1)">−</button>
+<div>
+<div class="participant-count" id="derbyParticipantCount">3</div>
+<div class="participant-label" data-i18n="batters_each">batters each</div>
+</div>
+<button class="btn-red" id="derbyPlus" onclick="changeDerbyCount(1)">+</button>
+</div>
+<p data-i18n="derby_note" style="color:var(--dim);font-size:.8em;margin:12px 0">Each batter gets 20 swings. Homer on your last swing? Keep going until you miss!</p>
+<p id="derbyConfigStatus" style="color:var(--dim);font-size:.85em"></p>
+<button class="btn-gold" id="derbyStartBtn" onclick="startDerbyDraft()" data-i18n="start_draft" style="margin-top:12px">Start Draft →</button>
+</div>
 </div>
 
 <!-- DERBY DRAFT SCREEN -->
 <div id="derbyDraft" class="screen">
-  <div class="derby-draft-wrap">
-    <div class="derby-draft-header">
-      <h1>💣 Derby Draft</h1>
-      <div class="derby-draft-turn" id="derbyDraftTurn"></div>
-      <div style="color:var(--dim);font-size:.85em" id="derbyDraftProgress"></div>
-    </div>
-    <div class="derby-draft-rosters" id="derbyDraftRosters"></div>
-    <div class="derby-pool" id="derbyDraftPool"></div>
-  </div>
+<div class="derby-draft-wrap">
+<div class="derby-draft-header">
+<h1 data-i18n="derby_draft">💣 Derby Draft</h1>
+<div class="derby-draft-turn" id="derbyDraftTurn"></div>
+<div style="color:var(--dim);font-size:.85em" id="derbyDraftProgress"></div>
+</div>
+<div class="derby-draft-rosters" id="derbyDraftRosters"></div>
+<div class="derby-pool" id="derbyDraftPool"></div>
+</div>
 </div>
 
 <!-- DERBY GAME SCREEN -->
 <div id="derby" class="screen">
-  <div class="derby-wrap">
-    <div class="derby-scoreboard" id="derbyScoreboard"></div>
-    <div class="derby-status" id="derbyStatus"></div>
-    <div id="derbyBatterPanel"></div>
-  </div>
+<div class="derby-wrap">
+<div class="derby-scoreboard" id="derbyScoreboard"></div>
+<div class="derby-status" id="derbyStatus"></div>
+<div id="derbyBatterPanel"></div>
+</div>
 </div>
 
 <!-- GAME SCREEN -->
 <div id="game" class="screen">
-  <div class="game-wrap">
-    <div class="scoreboard" id="scoreboard"></div>
-    <div class="game-status" id="gameStatus"></div>
-    <div id="gamePhase"></div>
-  </div>
+<div class="game-wrap">
+<div class="scoreboard" id="scoreboard"></div>
+<div class="game-status" id="gameStatus"></div>
+<div id="gamePhase"></div>
+</div>
 </div>
 
 <!-- OVERLAYS -->
@@ -217,16 +222,19 @@
 <!-- SHARED DATA (batters/pitchers/wildcards for client rendering) -->
 <script>
 function genDeg(ba,obp,slg){const hbpR=0.008,bbR=Math.max(0.02,(obp-ba)/(1-ba)-hbpR),abR=1-bbR-hbpR;const hitR=ba*abR,tbR=slg*abR,xb=(tbR-hitR)*360;let hr=Math.round(xb/5.2),trip=Math.max(0,Math.round(hr*0.1)),dbl=Math.round(xb-2*trip-3*hr);if(dbl<0)dbl=0;let sin=Math.round(hitR*360)-dbl-trip-hr;if(sin<0)sin=0;let bb=Math.round(bbR*360),hbp=Math.round(hbpR*360),so=Math.round((0.20+(0.260-ba)*0.3)*360);if(so<20)so=20;let rem=360-sin-dbl-trip-hr-bb-hbp-so;if(rem<0){so+=rem;rem=0;if(so<10){so=10;rem=360-sin-dbl-trip-hr-bb-hbp-so}}let go=Math.round(rem*0.56),fo=rem-go;if(fo<0){fo=0;go=rem}return[sin,dbl,trip,hr,bb,hbp,so,fo,go]}
-const BATTERS=[{n:"William Contreras",p:["C"],ba:.260,obp:.355,slg:.399,deg:[56,15,0,9,46,3,66,72,93]},{n:"Seiya Suzuki",p:["OF","DH"],ba:.245,obp:.326,slg:.478},{n:"Jacob Wilson",p:["SS"],ba:.311,obp:.355,slg:.444},{n:"Isaac Collins",p:["OF","2B"],ba:.263,obp:.368,slg:.411},{n:"Corbin Carroll",p:["OF"],ba:.259,obp:.343,slg:.541},{n:"Mike Trout",p:["DH","OF"],ba:.232,obp:.359,slg:.439},{n:"Hunter Goodman",p:["C","DH"],ba:.278,obp:.323,slg:.520},{n:"Zach Neto",p:["SS"],ba:.257,obp:.319,slg:.474},{n:"Jazz Chisholm Jr.",p:["2B"],ba:.242,obp:.332,slg:.481},{n:"Mookie Betts",p:["SS","OF"],ba:.258,obp:.326,slg:.406},{n:"Julio Rodriguez",p:["OF"],ba:.267,obp:.324,slg:.474},{n:"Salvador Perez",p:["C","1B"],ba:.236,obp:.284,slg:.446},{n:"Ketel Marte",p:["3B","2B","DH"],ba:.283,obp:.376,slg:.517},{n:"Curtis Mead",p:["2B","3B"],ba:.233,obp:.299,slg:.321},{n:"Kyle Stowers",p:["OF"],ba:.288,obp:.368,slg:.544},{n:"Adley Rutschman",p:["C","DH"],ba:.220,obp:.307,slg:.366},{n:"CJ Abrams",p:["SS"],ba:.257,obp:.315,slg:.433},{n:"Matt Olson",p:["1B"],ba:.272,obp:.366,slg:.484},{n:"Isaac Paredes",p:["3B"],ba:.254,obp:.352,slg:.458},{n:"Ronald Acuna Jr.",p:["OF"],ba:.250,obp:.360,slg:.500},{n:"Alejandro Kirk",p:["C"],ba:.265,obp:.340,slg:.380},{n:"Marcus Semien",p:["2B","SS"],ba:.272,obp:.340,slg:.470},{n:"Elly De La Cruz",p:["SS"],ba:.240,obp:.300,slg:.480},{n:"Isiah Kiner-Falefa",p:["3B","SS"],ba:.275,obp:.320,slg:.370},{n:"Bryce Harper",p:["1B","DH"],ba:.285,obp:.380,slg:.530},{n:"Willson Contreras",p:["C","DH"],ba:.260,obp:.345,slg:.450},{n:"Steven Kwan",p:["OF"],ba:.295,obp:.370,slg:.420},{n:"James Wood",p:["OF"],ba:.250,obp:.330,slg:.440},{n:"Logan O'Hoppe",p:["C"],ba:.244,obp:.310,slg:.420},{n:"Josh Jung",p:["3B"],ba:.262,obp:.320,slg:.480},{n:"Alex Call",p:["OF"],ba:.230,obp:.340,slg:.350},{n:"Cal Raleigh",p:["C"],ba:.232,obp:.310,slg:.480},{n:"Vladimir Guerrero Jr.",p:["1B"],ba:.290,obp:.370,slg:.530},{n:"Junior Caminero",p:["3B","SS"],ba:.260,obp:.310,slg:.440},{n:"Pete Crow-Armstrong",p:["OF"],ba:.240,obp:.300,slg:.400},{n:"Pete Alonso",p:["1B"],ba:.240,obp:.330,slg:.490},{n:"Corey Seager",p:["SS"],ba:.275,obp:.350,slg:.500},{n:"Edmundo Sosa",p:["SS","2B","3B"],ba:.255,obp:.300,slg:.380},{n:"Roman Anthony",p:["OF"],ba:.260,obp:.350,slg:.450},{n:"Aaron Judge",p:["OF","DH"],ba:.270,obp:.390,slg:.570},{n:"Jackson Chourio",p:["OF"],ba:.255,obp:.310,slg:.440},{n:"Willy Adames",p:["SS"],ba:.260,obp:.340,slg:.460},{n:"Rafael Devers",p:["3B"],ba:.280,obp:.360,slg:.510},{n:"Freddie Freeman",p:["1B"],ba:.290,obp:.380,slg:.500}];
+
+const BATTERS=[{n:"William Contreras",ja:"ウィリアム・コントレラス",p:["C"],ba:.260,obp:.355,slg:.399,deg:[56,15,0,9,46,3,66,72,93]},{n:"Seiya Suzuki",ja:"鈴木誠也",p:["OF","DH"],ba:.245,obp:.326,slg:.478},{n:"Jacob Wilson",ja:"ジェイコブ・ウィルソン",p:["SS"],ba:.311,obp:.355,slg:.444},{n:"Isaac Collins",ja:"アイザック・コリンズ",p:["OF","2B"],ba:.263,obp:.368,slg:.411},{n:"Corbin Carroll",ja:"コービン・キャロル",p:["OF"],ba:.259,obp:.343,slg:.541},{n:"Mike Trout",ja:"マイク・トラウト",p:["DH","OF"],ba:.232,obp:.359,slg:.439},{n:"Hunter Goodman",ja:"ハンター・グッドマン",p:["C","DH"],ba:.278,obp:.323,slg:.520},{n:"Zach Neto",ja:"ザック・ネト",p:["SS"],ba:.257,obp:.319,slg:.474},{n:"Jazz Chisholm Jr.",ja:"ジャズ・チザム・ジュニア",p:["2B"],ba:.242,obp:.332,slg:.481},{n:"Mookie Betts",ja:"ムーキー・ベッツ",p:["SS","OF"],ba:.258,obp:.326,slg:.406},{n:"Julio Rodriguez",ja:"フリオ・ロドリゲス",p:["OF"],ba:.267,obp:.324,slg:.474},{n:"Salvador Perez",ja:"サルバドール・ペレス",p:["C","1B"],ba:.236,obp:.284,slg:.446},{n:"Ketel Marte",ja:"ケテル・マルテ",p:["3B","2B","DH"],ba:.283,obp:.376,slg:.517},{n:"Curtis Mead",ja:"カーティス・ミード",p:["2B","3B"],ba:.233,obp:.299,slg:.321},{n:"Kyle Stowers",ja:"カイル・ストワーズ",p:["OF"],ba:.288,obp:.368,slg:.544},{n:"Adley Rutschman",ja:"アドリー・ラッチマン",p:["C","DH"],ba:.220,obp:.307,slg:.366},{n:"CJ Abrams",ja:"CJ・エイブラムス",p:["SS"],ba:.257,obp:.315,slg:.433},{n:"Matt Olson",ja:"マット・オルソン",p:["1B"],ba:.272,obp:.366,slg:.484},{n:"Isaac Paredes",ja:"アイザック・パレデス",p:["3B"],ba:.254,obp:.352,slg:.458},{n:"Ronald Acuna Jr.",ja:"ロナルド・アクーニャ・ジュニア",p:["OF"],ba:.250,obp:.360,slg:.500},{n:"Alejandro Kirk",ja:"アレハンドロ・カーク",p:["C"],ba:.265,obp:.340,slg:.380},{n:"Marcus Semien",ja:"マーカス・シミエン",p:["2B","SS"],ba:.272,obp:.340,slg:.470},{n:"Elly De La Cruz",ja:"エリー・デラクルス",p:["SS"],ba:.240,obp:.300,slg:.480},{n:"Isiah Kiner-Falefa",ja:"アイザイア・カイナーファレファ",p:["3B","SS"],ba:.275,obp:.320,slg:.370},{n:"Bryce Harper",ja:"ブライス・ハーパー",p:["1B","DH"],ba:.285,obp:.380,slg:.530},{n:"Willson Contreras",ja:"ウィルソン・コントレラス",p:["C","DH"],ba:.260,obp:.345,slg:.450},{n:"Steven Kwan",ja:"スティーブン・クワン",p:["OF"],ba:.295,obp:.370,slg:.420},{n:"James Wood",ja:"ジェームズ・ウッド",p:["OF"],ba:.250,obp:.330,slg:.440},{n:"Logan O'Hoppe",ja:"ローガン・オホッピ",p:["C"],ba:.244,obp:.310,slg:.420},{n:"Josh Jung",ja:"ジョシュ・ジョン",p:["3B"],ba:.262,obp:.320,slg:.480},{n:"Alex Call",ja:"アレックス・コール",p:["OF"],ba:.230,obp:.340,slg:.350},{n:"Cal Raleigh",ja:"カル・ローリー",p:["C"],ba:.232,obp:.310,slg:.480},{n:"Vladimir Guerrero Jr.",ja:"ウラジミール・ゲレーロ・ジュニア",p:["1B"],ba:.290,obp:.370,slg:.530},{n:"Junior Caminero",ja:"フニオル・カミネロ",p:["3B","SS"],ba:.260,obp:.310,slg:.440},{n:"Pete Crow-Armstrong",ja:"ピート・クロウアームストロング",p:["OF"],ba:.240,obp:.300,slg:.400},{n:"Pete Alonso",ja:"ピート・アロンソ",p:["1B"],ba:.240,obp:.330,slg:.490},{n:"Corey Seager",ja:"コーリー・シーガー",p:["SS"],ba:.275,obp:.350,slg:.500},{n:"Edmundo Sosa",ja:"エドムンド・ソーサ",p:["SS","2B","3B"],ba:.255,obp:.300,slg:.380},{n:"Roman Anthony",ja:"ローマン・アンソニー",p:["OF"],ba:.260,obp:.350,slg:.450},{n:"Aaron Judge",ja:"アーロン・ジャッジ",p:["OF","DH"],ba:.270,obp:.390,slg:.570},{n:"Jackson Chourio",ja:"ジャクソン・チュウリオ",p:["OF"],ba:.255,obp:.310,slg:.440},{n:"Willy Adames",ja:"ウィリー・アダメス",p:["SS"],ba:.260,obp:.340,slg:.460},{n:"Rafael Devers",ja:"ラファエル・デバース",p:["3B"],ba:.280,obp:.360,slg:.510},{n:"Freddie Freeman",ja:"フレディ・フリーマン",p:["1B"],ba:.290,obp:.380,slg:.500}];
 BATTERS.forEach(b=>{if(!b.deg)b.deg=genDeg(b.ba,b.obp,b.slg)});
-const PITCHERS=[{n:"Michael Wacha",mul:[7,10,15,20,24,60,70],add:[5,7,13,19]},{n:"Yoshinobu Yamamoto",mul:[8,12,18,24,32,40,45,54,63,70],add:[2,5,10,12,15,20]},{n:"Ryan Walker",mul:[7,9,14,18,21,36,42],add:[2,3,6,7,17]},{n:"Michael King",mul:[4,9,12,16,27,36,64,81],add:[3,11,14,20]},{n:"Shota Imanaga",mul:[14,16,27,30,36,45,56,63],add:[3,5,8,16,19]},{n:"Bryan Woo",mul:[6,10,16,27,30,36,40,50,63],add:[3,6,10,14,19,20]},{n:"Pablo Lopez",mul:[8,12,20,24,32,45,56,80],add:[7,9,14,19,20]},{n:"Sean Manaea",mul:[6,8,12,21,25,35,49],add:[2,6,14,18,19]},{n:"Yusei Kikuchi",mul:[6,10,14,20,28,35,42,56],add:[4,7,11,15,18]},{n:"Paul Skenes",mul:[9,16,18,24,30,36,48,54,72],add:[3,6,9,12,16,18]},{n:"Jesus Luzardo",mul:[8,15,21,28,35,42,48],add:[4,8,13,17]},{n:"Aaron Nola",mul:[6,12,18,24,30,42,56,63],add:[3,7,11,14,18]},{n:"Yu Darvish",mul:[9,14,18,25,32,40,48,54,72],add:[2,5,9,13,16,19]},{n:"Jonathan Loaisiga",mul:[8,12,16,24,36,48],add:[4,8,12,16]},{n:"Yuki Matsui",mul:[6,10,15,21,28,42,56],add:[3,7,11,15,19]},{n:"Jacob deGrom",mul:[6,8,15,21,24,40,56,63,72],add:[2,4,8,13,17,18]},{n:"Jacob Misiorowski",mul:[9,14,21,28,42],add:[5,9,14]},{n:"Tarik Skubal",mul:[8,12,18,24,32,40,48,56,63],add:[3,6,9,12,15,18]}];
-const WILD_CARD_DEFS=[{name:"Stolen Base",icon:"🏃",type:"bat",desc:"Runner on 1st/2nd advances one base",canPlay:(gs,t)=>t==='pre'&&(gs.bases[0]||gs.bases[1])},{name:"Double Steal",icon:"🏃‍♂️",type:"bat",desc:"Runners on 1st AND 2nd both advance",canPlay:(gs,t)=>t==='pre'&&gs.bases[0]&&gs.bases[1]},{name:"Stealing Home",icon:"🏠",type:"bat",desc:"Runner on 3rd scores",canPlay:(gs,t)=>t==='pre'&&gs.bases[2]},{name:"Safe on Error",icon:"❌",type:"bat",desc:"On GO/FO: batter to 1st, runners advance 1",canPlay:(gs,t)=>t==='post'&&(gs.lastResult==='GO'||gs.lastResult==='FO')},{name:"Sacrifice Bunt",icon:"🤏",type:"bat",desc:"<2 outs, runner on 1st: batter out, runners advance",canPlay:(gs,t)=>t==='pre'&&gs.outs<2&&gs.bases[0]},{name:"Suicide Squeeze",icon:"💨",type:"bat",desc:"<2 outs, runner on 3rd: batter out, runner scores",canPlay:(gs,t)=>t==='pre'&&gs.outs<2&&gs.bases[2]},{name:"Catcher's Interference",icon:"🧤",type:"bat",desc:"Batter to 1st, forced runners advance",canPlay:(gs,t)=>t==='pre'},{name:"Passed Ball",icon:"⚾",type:"bat",desc:"On SO with 1st open: batter to 1st",canPlay:(gs,t)=>t==='post'&&gs.lastResult==='SO'&&!gs.bases[0]},{name:"Wild Pitch",icon:"🌀",type:"bat",desc:"Runner on 1st/2nd advances one base",canPlay:(gs,t)=>t==='pre'&&(gs.bases[0]||gs.bases[1])},{name:"Pitcher Balk",icon:"⚠️",type:"bat",desc:"Runner on 1st/2nd advances one base",canPlay:(gs,t)=>t==='pre'&&(gs.bases[0]||gs.bases[1])},{name:"Intentional Walk",icon:"👉",type:"pitch",desc:"Batter to 1st, forced runners advance",canPlay:(gs,t)=>t==='pre'},{name:"Double Play",icon:"✌️",type:"pitch",desc:"Runner on 1st, <2 outs, GO: both out",canPlay:(gs,t)=>t==='post'&&gs.lastResult==='GO'&&gs.bases[0]&&gs.outsBeforePlay<2},{name:"Force Out",icon:"👊",type:"pitch",desc:"Runner on 1st + GO: lead runner out",canPlay:(gs,t)=>t==='post'&&gs.lastResult==='GO'&&gs.bases[0]},{name:"Triple Play",icon:"🔥",type:"pitch",desc:"1st+2nd occupied, 0 outs, GO: all three out",canPlay:(gs,t)=>t==='post'&&gs.lastResult==='GO'&&gs.bases[0]&&gs.bases[1]&&gs.outsBeforePlay===0},{name:"Caught Stealing",icon:"🚫",type:"pitch",desc:"After stolen base: stealing runner is out",canPlay:(gs,t)=>t==='post'&&gs.lastWCWasSteal},{name:"Outfield Assist",icon:"💪",type:"pitch",desc:"Runner on 3rd, <2 outs, FO: runner out",canPlay:(gs,t)=>t==='post'&&gs.lastResult==='FO'&&gs.bases[2]&&gs.outsBeforePlay<2},{name:"Pitcher Pick-Off",icon:"🎯",type:"pitch",desc:"Runner on 1st/2nd: lead runner out",canPlay:(gs,t)=>t==='pre'&&(gs.bases[0]||gs.bases[1])}];
+
+const PITCHERS=[{n:"Michael Wacha",ja:"マイケル・ワカ",mul:[7,10,15,20,24,60,70],add:[5,7,13,19]},{n:"Yoshinobu Yamamoto",ja:"山本由伸",mul:[8,12,18,24,32,40,45,54,63,70],add:[2,5,10,12,15,20]},{n:"Ryan Walker",ja:"ライアン・ウォーカー",mul:[7,9,14,18,21,36,42],add:[2,3,6,7,17]},{n:"Michael King",ja:"マイケル・キング",mul:[4,9,12,16,27,36,64,81],add:[3,11,14,20]},{n:"Shota Imanaga",ja:"今永昇太",mul:[14,16,27,30,36,45,56,63],add:[3,5,8,16,19]},{n:"Bryan Woo",ja:"ブライアン・ウー",mul:[6,10,16,27,30,36,40,50,63],add:[3,6,10,14,19,20]},{n:"Pablo Lopez",ja:"パブロ・ロペス",mul:[8,12,20,24,32,45,56,80],add:[7,9,14,19,20]},{n:"Sean Manaea",ja:"ショーン・マナエア",mul:[6,8,12,21,25,35,49],add:[2,6,14,18,19]},{n:"Yusei Kikuchi",ja:"菊池雄星",mul:[6,10,14,20,28,35,42,56],add:[4,7,11,15,18]},{n:"Paul Skenes",ja:"ポール・スキーンズ",mul:[9,16,18,24,30,36,48,54,72],add:[3,6,9,12,16,18]},{n:"Jesus Luzardo",ja:"ヘスス・ルザード",mul:[8,15,21,28,35,42,48],add:[4,8,13,17]},{n:"Aaron Nola",ja:"アーロン・ノラ",mul:[6,12,18,24,30,42,56,63],add:[3,7,11,14,18]},{n:"Yu Darvish",ja:"ダルビッシュ有",mul:[9,14,18,25,32,40,48,54,72],add:[2,5,9,13,16,19]},{n:"Jonathan Loaisiga",ja:"ジョナサン・ロアイシガ",mul:[8,12,16,24,36,48],add:[4,8,12,16]},{n:"Yuki Matsui",ja:"松井裕樹",mul:[6,10,15,21,28,42,56],add:[3,7,11,15,19]},{n:"Jacob deGrom",ja:"ジェイコブ・デグロム",mul:[6,8,15,21,24,40,56,63,72],add:[2,4,8,13,17,18]},{n:"Jacob Misiorowski",ja:"ジェイコブ・ミシオロウスキー",mul:[9,14,21,28,42],add:[5,9,14]},{n:"Tarik Skubal",ja:"タリク・スクバル",mul:[8,12,18,24,32,40,48,56,63],add:[3,6,9,12,15,18]}];
+
+const WILD_CARD_DEFS=[{name:"Stolen Base",nameJa:"盗塁",icon:"🏃",type:"bat",desc:"Runner on 1st/2nd advances one base",descJa:"1塁の走者は2塁へ、2塁の走者は3塁へ進む",canPlay:(gs,t)=>t==='pre'&&(gs.bases[0]||gs.bases[1])},{name:"Double Steal",nameJa:"ダブルスチール",icon:"🏃‍♂️",type:"bat",desc:"Runners on 1st AND 2nd both advance",descJa:"1塁と2塁の走者がそれぞれ2塁・3塁へ進む",canPlay:(gs,t)=>t==='pre'&&gs.bases[0]&&gs.bases[1]},{name:"Stealing Home",nameJa:"本盗(ホームスチール)",icon:"🏠",type:"bat",desc:"Runner on 3rd scores",descJa:"3塁の走者が生還して得点",canPlay:(gs,t)=>t==='pre'&&gs.bases[2]},{name:"Safe on Error",nameJa:"エラー(失策)",icon:"❌",type:"bat",desc:"On GO/FO: batter to 1st, runners advance 1",descJa:"ゴロ／ファウルアウト時：打者は1塁へ、全走者が1つ進塁",canPlay:(gs,t)=>t==='post'&&(gs.lastResult==='GO'||gs.lastResult==='FO')},{name:"Sacrifice Bunt",nameJa:"犠牲バント",icon:"🤏",type:"bat",desc:"<2 outs, runner on 1st: batter out, runners advance",descJa:"2アウト未満・1塁に走者：打者はアウト、走者が進塁",canPlay:(gs,t)=>t==='pre'&&gs.outs<2&&gs.bases[0]},{name:"Suicide Squeeze",nameJa:"スーサイドスクイズ",icon:"💨",type:"bat",desc:"<2 outs, runner on 3rd: batter out, runner scores",descJa:"2アウト未満・3塁に走者：打者はアウト、走者が生還",canPlay:(gs,t)=>t==='pre'&&gs.outs<2&&gs.bases[2]},{name:"Catcher's Interference",nameJa:"打撃妨害",icon:"🧤",type:"bat",desc:"Batter to 1st, forced runners advance",descJa:"打者は1塁へ、押し出しの走者のみ進塁",canPlay:(gs,t)=>t==='pre'},{name:"Passed Ball",nameJa:"振り逃げ(パスボール)",icon:"⚾",type:"bat",desc:"On SO with 1st open: batter to 1st",descJa:"三振かつ1塁が空いている時：打者は1塁へ、他の走者は留まる",canPlay:(gs,t)=>t==='post'&&gs.lastResult==='SO'&&!gs.bases[0]},{name:"Wild Pitch",nameJa:"暴投(ワイルドピッチ)",icon:"🌀",type:"bat",desc:"Runner on 1st/2nd advances one base",descJa:"1塁／2塁の走者が1つ進塁",canPlay:(gs,t)=>t==='pre'&&(gs.bases[0]||gs.bases[1])},{name:"Pitcher Balk",nameJa:"ボーク",icon:"⚠️",type:"bat",desc:"Runner on 1st/2nd advances one base",descJa:"1塁／2塁の走者が1つ進塁",canPlay:(gs,t)=>t==='pre'&&(gs.bases[0]||gs.bases[1])},{name:"Intentional Walk",nameJa:"申告敬遠",icon:"👉",type:"pitch",desc:"Batter to 1st, forced runners advance",descJa:"打者は1塁へ、押し出しの走者のみ進塁",canPlay:(gs,t)=>t==='pre'},{name:"Double Play",nameJa:"ダブルプレー",icon:"✌️",type:"pitch",desc:"Runner on 1st, <2 outs, GO: both out",descJa:"1塁に走者・2アウト未満・ゴロ：走者と打者が共にアウト",canPlay:(gs,t)=>t==='post'&&gs.lastResult==='GO'&&gs.bases[0]&&gs.outsBeforePlay<2},{name:"Force Out",nameJa:"フォースアウト",icon:"👊",type:"pitch",desc:"Runner on 1st + GO: lead runner out",descJa:"1塁に走者＋ゴロ：本塁に一番近い走者がアウト",canPlay:(gs,t)=>t==='post'&&gs.lastResult==='GO'&&gs.bases[0]},{name:"Triple Play",nameJa:"トリプルプレー",icon:"🔥",type:"pitch",desc:"1st+2nd occupied, 0 outs, GO: all three out",descJa:"1・2塁に走者・0アウト・ゴロ：3人ともアウト、イニング終了",canPlay:(gs,t)=>t==='post'&&gs.lastResult==='GO'&&gs.bases[0]&&gs.bases[1]&&gs.outsBeforePlay===0},{name:"Caught Stealing",nameJa:"盗塁失敗",icon:"🚫",type:"pitch",desc:"After stolen base: stealing runner is out",descJa:"盗塁の後：盗塁を試みた走者がアウト",canPlay:(gs,t)=>t==='post'&&gs.lastWCWasSteal},{name:"Outfield Assist",nameJa:"外野アシスト",icon:"💪",type:"pitch",desc:"Runner on 3rd, <2 outs, FO: runner out",descJa:"3塁に走者・2アウト未満・ファウルアウト：生還を試みた走者がアウト",canPlay:(gs,t)=>t==='post'&&gs.lastResult==='FO'&&gs.bases[2]&&gs.outsBeforePlay<2},{name:"Pitcher Pick-Off",nameJa:"投手の牽制",icon:"🎯",type:"pitch",desc:"Runner on 1st/2nd: lead runner out",descJa:"1塁／2塁の走者：先頭走者がピッチ前にアウト",canPlay:(gs,t)=>t==='pre'&&(gs.bases[0]||gs.bases[1])}];
 </script>
 
 <!-- Socket.IO client library (served by the server) -->
 <script src="/socket.io/socket.io.js"></script>
-
 <!-- Client modules -->
+<script src="js/utils/i18n.js"></script>
 <script src="js/utils/constants.js"></script>
 <script src="js/utils/helpers.js"></script>
 <script src="js/state/clientState.js"></script>
@@ -241,6 +249,5 @@ const WILD_CARD_DEFS=[{name:"Stolen Base",icon:"🏃",type:"bat",desc:"Runner on
 <script src="js/screens/derby.js"></script>
 <script src="js/socket.js"></script>
 <script src="js/app.js"></script>
-
 </body>
 </html>
