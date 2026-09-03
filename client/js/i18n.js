@@ -4,6 +4,9 @@
    ============================================================ */
 (function () {
   "use strict";
+     if (window.__mlbI18n) return;
+  window.__mlbI18n = true;
+
 
   const STORE_KEY = "mlbLang";
   let lang = localStorage.getItem(STORE_KEY) || "en"; // default English
