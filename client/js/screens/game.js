@@ -12,7 +12,8 @@ function renderGamePhase() {
     renderGameOver(gs);
     return;
   }
-  document.getElementById('gameStatus').innerHTML = fmtGameStatus(gs.inning, gs.half, gs.teams[gs.half].name);
+  const topBot = gs.half === 0 ? 'Top' : 'Bottom';
+  document.getElementById('gameStatus').innerHTML = `<b>${topBot} of ${gs.inning}</b> — ${gs.teams[gs.half].name} batting`;
   if (gs.phase === 'offense') {
     renderOffensePhase(gs);
   } else {
@@ -28,11 +29,11 @@ function renderOffensePhase(gs) {
   let wcHtml = renderWCHand(gs, bt, 'pre', WILD_CARD_DEFS, BATTERS, PITCHERS);
   document.getElementById('gamePhase').innerHTML = `
     <div class="phase-panel">
-      <span class="phase-label off">${t('offense')}</span>
-      <div class="batter-info">${avatarHTML(nm(b))}<div class="player-detail">
-        <h3>${nm(b)}</h3>
+      <span class="phase-label off">Offense</span>
+      <div class="batter-info">${avatarHTML(b.n)}<div class="player-detail">
+        <h3>${b.n}</h3>
         <div class="pd-pos">${b.p.join(' / ')}</div>
-        <div class="pd-stats">${t('ba')} ${b.ba.toFixed(3)} | ${t('obp')} ${b.obp.toFixed(3)} | ${t('slg')} ${b.slg.toFixed(3)}</div>
+        <div class="pd-stats">BA ${b.ba.toFixed(3)} | OBP ${b.obp.toFixed(3)} | SLG ${b.slg.toFixed(3)}</div>
       </div></div>
       ${renderBasesAndOuts(gs)}
       <div class="wheel-area">
@@ -41,8 +42,8 @@ function renderOffensePhase(gs) {
           <canvas id="gameWheel" width="560" height="560" style="width:280px;height:280px;transition:transform 3s cubic-bezier(.17,.67,.12,.99)"></canvas>
         </div>
         <div class="spin-result" id="spinResult"></div>
-        ${isBattingTeam && !gs.spinDone ? `<button class="btn-gold" id="spinBtn" onclick="emitSpin()">${t('spin_btn')}</button>` : ''}
-        ${!isBattingTeam && !gs.spinDone ? `<div style="color:var(--dim);text-align:center">${t('waiting_spin')}</div>` : ''}
+        ${isBattingTeam && !gs.spinDone ? '<button class="btn-gold" id="spinBtn" onclick="emitSpin()">🎰 Spin!</button>' : ''}
+        ${!isBattingTeam && !gs.spinDone ? '<div style="color:var(--dim);text-align:center">Waiting for opponent to spin...</div>' : ''}
       </div>
       ${wcHtml}
       <div class="action-btns" id="offenseActions"></div>
@@ -55,6 +56,13 @@ function renderOffensePhase(gs) {
     void wh.offsetHeight;
     wh.style.transition = 'transform 3s cubic-bezier(.17,.67,.12,.99)';
   }
+  // Restore the action button after a re-draw (e.g. a wild card was just played)
+  if (gs.spinDone) {
+    const oa = document.getElementById('offenseActions');
+    if (oa) oa.innerHTML = isBattingTeam
+      ? `<button class="btn-red" onclick="emitToDefense()">Defense Turn →</button>`
+      : `<div style="color:var(--dim)">Waiting for opponent...</div>`;
+  }
 }
 
 function renderDefensePhase(gs) {
@@ -65,15 +73,15 @@ function renderDefensePhase(gs) {
   let wcHtml = renderWCHand(gs, ft, 'post', WILD_CARD_DEFS, BATTERS, PITCHERS);
   document.getElementById('gamePhase').innerHTML = `
     <div class="phase-panel">
-      <span class="phase-label def">${t('defense')}</span>
-      <div class="pitcher-info">${avatarHTML(nm(p))}<div class="player-detail">
-        <h3>${nm(p)}</h3><div class="pd-pos">${t('pitcher')}</div>
+      <span class="phase-label def">Defense</span>
+      <div class="pitcher-info">${avatarHTML(p.n)}<div class="player-detail">
+        <h3>${p.n}</h3><div class="pd-pos">Pitcher</div>
       </div></div>
-      <div class="reminder-bar">${t('spin_result')} <b style="color:${OUTCOME_COLORS[gs.lastResultIdx]}">${outcomeLabel(gs.lastResultIdx)}</b></div>
+      <div class="reminder-bar">Spin result: <b style="color:${OUTCOME_COLORS[gs.lastResultIdx]}">${OUTCOME_LABELS[gs.lastResultIdx]}</b></div>
       <div class="pitch-numbers">
-        <div class="pitch-num-group"><span class="png-label">${t('multiply_x')}</span>
+        <div class="pitch-num-group"><span class="png-label">Multiply (×)</span>
         <div class="png-chips">${p.mul.map(v => `<span class="pchip mul" id="mul${v}">${v}</span>`).join('')}</div></div>
-        <div class="pitch-num-group"><span class="png-label">${t('add_plus')}</span>
+        <div class="pitch-num-group"><span class="png-label">Add (+)</span>
         <div class="png-chips">${p.add.map(v => `<span class="pchip add" id="add${v}">${v}</span>`).join('')}</div></div>
       </div>
       <div class="dice-area">
@@ -85,16 +93,37 @@ function renderDefensePhase(gs) {
         </div>
         <div class="dice-btns" id="diceBtns">
           ${isFieldingTeam && !gs.diceDone ? `
-          <button class="btn-blue" onclick="emitRollDice('mul')">${t('roll_mul')}</button>
-          <button class="btn-red" onclick="emitRollDice('add')">${t('roll_add')}</button>
+          <button class="btn-blue" onclick="emitRollDice('mul')">Roll × Multiply</button>
+          <button class="btn-red" onclick="emitRollDice('add')">Roll + Add</button>
           ` : ''}
-          ${!isFieldingTeam && !gs.diceDone ? `<div style="color:var(--dim)">${t('waiting_roll')}</div>` : ''}
+          ${!isFieldingTeam && !gs.diceDone ? '<div style="color:var(--dim)">Waiting for opponent to roll...</div>' : ''}
         </div>
       </div>
       <div id="shiftArea"></div>
       ${wcHtml}
       <div class="action-btns" id="defenseActions"></div>
     </div>`;
+  // Restore the action button after a re-draw (e.g. a wild card was just played)
+  if (gs.diceDone) {
+    const nums = gs.diceOp === 'mul' ? p.mul : p.add;
+    const matched = nums.includes(gs.diceResult);
+    if (matched && !gs.shiftDone) {
+      const ci = gs.lastResultIdx;
+      const leftIdx = ci > 0 ? ci - 1 : OUTCOME_KEYS.length - 1;
+      const rightIdx = ci < OUTCOME_KEYS.length - 1 ? ci + 1 : 0;
+      const sa = document.getElementById('shiftArea');
+      if (sa) sa.innerHTML = isFieldingTeam
+        ? `<div style="text-align:center;color:var(--gold);font-weight:700;margin-bottom:6px">Match! Choose shift direction:</div>
+           <div class="shift-area">
+             <button class="btn-sm btn-blue" onclick="emitShift(-1)">← ${OUTCOME_KEYS[leftIdx]}</button>
+             <button class="btn-sm btn-gold" onclick="emitShift(0)">Keep ${OUTCOME_KEYS[ci]}</button>
+             <button class="btn-sm btn-red" onclick="emitShift(1)">→ ${OUTCOME_KEYS[rightIdx]}</button>
+           </div>`
+        : `<div style="text-align:center;color:var(--gold);margin:8px 0">Match! Opponent is choosing shift...</div>`;
+    } else {
+      showApplyUI();
+    }
+  }
 }
 
 function renderGameOver(gs) {
@@ -104,14 +133,14 @@ function renderGameOver(gs) {
   document.getElementById('gameStatus').innerHTML = '';
   document.getElementById('gamePhase').innerHTML = `
     <div class="game-over-panel">
-      <h1>${t('game_over')}</h1>
+      <h1>Game Over!</h1>
       <div class="final-score">
         <span style="color:var(--blue)">${gs.teams[0].name} ${gs.score[0]}</span>
         <span style="color:var(--dim)"> — </span>
         <span style="color:var(--red)">${gs.score[1]} ${gs.teams[1].name}</span>
       </div>
-      <p style="color:var(--gold);font-size:1.3em;margin:12px 0">${fmtWins(gs.teams[winner].name)}${isWinner ? ' 🎉' : ''}</p>
-      <button class="btn-gold" onclick="location.reload()" style="margin-top:16px">${t('new_game')}</button>
+      <p style="color:var(--gold);font-size:1.3em;margin:12px 0">${gs.teams[winner].name} wins!${isWinner ? ' 🎉' : ''}</p>
+      <button class="btn-gold" onclick="location.reload()" style="margin-top:16px">New Game</button>
     </div>`;
 }
 
@@ -149,22 +178,18 @@ function fireResultAnim(text, idx, isRun) {
   const color = idx >= 0 ? OUTCOME_COLORS[idx] : (isRun ? 'var(--gold)' : '#fff');
   const icons = { HR: '💣', SO: '🌀', '3B': '⚡', '2B': '🔥', '1B': '💥', BB: '👀', HBP: '😤', FO: '✈️', GO: '⬇️' };
   const icon = idx >= 0 ? (icons[OUTCOME_KEYS[idx]] || '') : '🎉';
-  const label = idx >= 0 ? outcomeLabel(idx) : text;
-  rt.innerHTML = `<span style="color:${color}">${icon} ${label}</span>`;
+  rt.innerHTML = `<span style="color:${color}">${icon} ${typeof text === 'string' ? text : OUTCOME_LABELS[idx]}</span>`;
   ol.classList.remove('show'); void ol.offsetHeight; ol.classList.add('show');
   setTimeout(() => ol.classList.remove('show'), 900);
-  if (isRun || (idx >= 0 && OUTCOME_KEYS[idx] === 'HR')) confetti();
+  if (text === 'Home Run' || isRun) confetti();
 }
 
 function showWCAnimation(wc) {
   const ol = document.getElementById('wcOverlay');
-  // Server sends English card data; map back to client defs so it localizes too.
-  const def = (typeof WILD_CARD_DEFS !== 'undefined') ? WILD_CARD_DEFS.find(d => d.name === wc.name) : null;
-  const card = def || wc;
   document.getElementById('wcPlayCard').innerHTML = `
-    <div class="wpc-icon">${wc.icon || card.icon}</div>
-    <div class="wpc-name">${wcName(card)}</div>
-    <div class="wpc-desc">${wcDesc(card)}</div>`;
+    <div class="wpc-icon">${wc.icon}</div>
+    <div class="wpc-name">${wc.name}</div>
+    <div class="wpc-desc">${wc.desc}</div>`;
   ol.classList.remove('show'); void ol.offsetHeight; ol.classList.add('show');
   setTimeout(() => ol.classList.remove('show'), 1000);
 }
