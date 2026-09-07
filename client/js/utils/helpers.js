@@ -11,7 +11,16 @@ function seededRand(seed, i) {
   return ((s >>> 16) ^ s) >>> 0;
 }
 
-function avatarHTML(name, size) {
+// Turn a player name into an image filename: "Ronald Acuna Jr." -> "ronald-acuna-jr"
+function faceSlug(name) {
+  return name.toLowerCase()
+    .replace(/['.]/g, '')         // drop apostrophes and periods
+    .replace(/[^a-z0-9]+/g, '-')  // any run of other chars -> single hyphen
+    .replace(/^-+|-+$/g, '');     // trim hyphens at the ends
+}
+
+// The generated cartoon face — used as a fallback when there's no photo.
+function generatedFaceSVG(name, size) {
   size = size || 56;
   const h = nameHash(name);
   const r = (i) => seededRand(h, i);
@@ -54,6 +63,18 @@ function avatarHTML(name, size) {
   if (hasBeard) svg += `<path d="M${cx - faceR * .5},${mY - 2} Q${cx - faceR * .4},${mY + size * .12} ${cx},${mY + size * .15} Q${cx + faceR * .4},${mY + size * .12} ${cx + faceR * .5},${mY - 2}" fill="${hairC}" opacity=".5"/>`;
   svg += `</svg>`;
   return svg;
+}
+
+// Real photo if we have one, otherwise the generated cartoon. Same signature as before,
+// so every existing avatarHTML(...) call now shows a face photo automatically.
+function avatarHTML(name, size) {
+  size = size || 56;
+  const svg = generatedFaceSVG(name, size);
+  const src = `assets/faces/${faceSlug(name)}.png`;  // change .png to .jpg here if your files are JPGs
+  return `<span style="position:relative;display:inline-block;width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;flex-shrink:0;vertical-align:middle">`
+       + `<span style="position:absolute;inset:0">${svg}</span>`
+       + `<img src="${src}" alt="${name}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">`
+       + `</span>`;
 }
 
 function showScreen(id) {
