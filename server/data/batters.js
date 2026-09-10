@@ -66,7 +66,7 @@ const BATTERS = [
   {n:"Corey Seager",p:["SS"],ba:.275,obp:.350,slg:.500},
   {n:"Edmundo Sosa",p:["SS","2B","3B"],ba:.255,obp:.300,slg:.380},
   {n:"Roman Anthony",p:["OF"],ba:.260,obp:.350,slg:.450},
-  {n:"Aaron Judge",p:["OF","DH"],ba:.270,obp:.390,slg:.570},
+  {n:"Aaron Judge",p:["OF","DH"],ba:.270,obp:.390,slg:.570,deg:[50,17,1,28,66,4,86,65,43]},
   {n:"Jackson Chourio",p:["OF"],ba:.255,obp:.310,slg:.440},
   {n:"Willy Adames",p:["SS"],ba:.260,obp:.340,slg:.460},
   {n:"Rafael Devers",p:["3B"],ba:.280,obp:.360,slg:.510},
