@@ -82,7 +82,7 @@ function rollDice(gs, op, dice) {
   if (gs.diceDone) return null;
   gs.diceOp = op;
   const v0 = (dice && dice.length === 2) ? dice[0] : Math.floor(Math.random() * 9) + 1;
-  ‎const v1 = (dice && dice.length === 2) ? dice[1] : Math.floor(Math.random() * 9) + 1;
+  const v1 = (dice && dice.length === 2) ? dice[1] : Math.floor(Math.random() * 9) + 1;
   gs.diceVals = [v0, v1];
   gs.diceResult = op === 'mul' ? v0 * v1 : v0 + v1;
   gs.diceDone = true;
