@@ -54,7 +54,7 @@ module.exports = function(io, socket) {
         if (t.lineup.length === 0) t.lineup = [...t.batters];
       });
 
-      room.gameState = initGameState(room.gameState.teams);
+      room.gameState = initGameState(room.gameState.teams); room.gameState.manualDice = room.manualDice;
       io.to(roomCode).emit('gameStart', { gameState: room.gameState });
     }
   });
