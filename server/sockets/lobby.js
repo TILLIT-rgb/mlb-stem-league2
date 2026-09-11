@@ -6,7 +6,7 @@ module.exports = function(io, socket) {
     const room = createRoom();
     const playerName = (data && data.teamName) || 'Team 1';
     room.host = socket.id;
-    room.mode = 'game';
+    room.mode = 'game'; room.manualDice = !!(data && data.manualDice);
     room.players.push({
       socketId: socket.id,
       slot: 0,
