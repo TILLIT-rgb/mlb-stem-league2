@@ -77,7 +77,7 @@ function renderDefensePhase(gs) {
       <div class="pitcher-info">${avatarHTML(p.n)}<div class="player-detail">
         <h3>${p.n}</h3><div class="pd-pos">Pitcher</div>
       </div></div>
-      <div class="reminder-bar">Spin result: <b style="color:${OUTCOME_COLORS[gs.lastResultIdx]}">${OUTCOME_LABELS[gs.lastResultIdx]}</b></div>
+      <div class="reminder-bar">Spin result: <b style="color:${OUTCOME_COLORS[gs.lastResultIdx]}">${outcomeLabel(gs.lastResultIdx)}</b></div>
       <div class="pitch-numbers">
         <div class="pitch-num-group"><span class="png-label">Multiply (×)</span>
         <div class="png-chips">${p.mul.map(v => `<span class="pchip mul" id="mul${v}">${v}</span>`).join('')}</div></div>
@@ -178,7 +178,7 @@ function fireResultAnim(text, idx, isRun) {
   const color = idx >= 0 ? OUTCOME_COLORS[idx] : (isRun ? 'var(--gold)' : '#fff');
   const icons = { HR: '💣', SO: '🌀', '3B': '⚡', '2B': '🔥', '1B': '💥', BB: '👀', HBP: '😤', FO: '✈️', GO: '⬇️' };
   const icon = idx >= 0 ? (icons[OUTCOME_KEYS[idx]] || '') : '🎉';
-  rt.innerHTML = `<span style="color:${color}">${icon} ${typeof text === 'string' ? text : OUTCOME_LABELS[idx]}</span>`;
+  rt.innerHTML = `<span style="color:${color}">${icon} ${typeof text === 'string' ? text : outcomeLabel(idx)}</span>`;
   ol.classList.remove('show'); void ol.offsetHeight; ol.classList.add('show');
   setTimeout(() => ol.classList.remove('show'), 900);
   if (text === 'Home Run' || isRun) confetti();
