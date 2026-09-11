@@ -1,3 +1,7 @@
+// Auto-generate a 9-slice wheel from BA/OBP/SLG — identical to the client's genDeg
+// so the server's spin logic and the client's display always match.
+function genDeg(ba,obp,slg){const hbpR=0.008,bbR=Math.max(0.02,(obp-ba)/(1-ba)-hbpR),abR=1-bbR-hbpR;const hitR=ba*abR,tbR=slg*abR,xb=(tbR-hitR)*360;let hr=Math.round(xb/5.2),trip=Math.max(0,Math.round(hr*0.1)),dbl=Math.round(xb-2*trip-3*hr);if(dbl<0)dbl=0;let sin=Math.round(hitR*360)-dbl-trip-hr;if(sin<0)sin=0;let bb=Math.round(bbR*360),hbp=Math.round(hbpR*360),so=Math.round((0.20+(0.260-ba)*0.3)*360);if(so<20)so=20;let rem=360-sin-dbl-trip-hr-bb-hbp-so;if(rem<0){so+=rem;rem=0;if(so<10){so=10;rem=360-sin-dbl-trip-hr-bb-hbp-so}}let go=Math.round(rem*0.56),fo=rem-go;if(fo<0){fo=0;go=rem}return[sin,dbl,trip,hr,bb,hbp,so,fo,go]}
+
 const BATTERS = [
   {n:"Aaron Judge",p:["OF","DH"],ba:.331,obp:.457,slg:.688,deg:[50,17,1,28,66,4,86,65,43]},
   {n:"Adley Rutschman",p:["C"],ba:.220,obp:.307,slg:.366,deg:[44,16,2,9,40,1,56,101,91]},
@@ -56,5 +60,7 @@ const BATTERS = [
   {n:"Xander Bogaerts",p:["SS","2B"],ba:.263,obp:.328,slg:.391},
   {n:"Zach Neto",p:["SS"],ba:.257,obp:.319,slg:.474}
 ];
+
+BATTERS.forEach(b=>{if(!b.deg)b.deg=genDeg(b.ba,b.obp,b.slg)});
 
 module.exports = { BATTERS };
