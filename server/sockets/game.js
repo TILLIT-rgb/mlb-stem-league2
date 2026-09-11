@@ -21,7 +21,7 @@ module.exports = function(io, socket) {
     });
   });
 
-  ‎socket.on('rollDice', ({ roomCode, operation, dice }) => {
+  socket.on('rollDice', ({ roomCode, operation, dice }) => {
     const room = getRoom(roomCode);
     if (!room || room.phase !== 'game') return;
 
