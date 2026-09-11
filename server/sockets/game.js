@@ -21,7 +21,7 @@ module.exports = function(io, socket) {
     });
   });
 
-  socket.on('rollDice', ({ roomCode, operation }) => {
+  ‎socket.on('rollDice', ({ roomCode, operation, dice }) => {
     const room = getRoom(roomCode);
     if (!room || room.phase !== 'game') return;
 
@@ -30,7 +30,7 @@ module.exports = function(io, socket) {
       return socket.emit('actionError', { reason: 'Not your turn to roll' });
     }
 
-    const result = engine.rollDice(gs, operation);
+    const result = engine.rollDice(gs, operation, dice);
     if (!result) return socket.emit('actionError', { reason: 'Already rolled' });
 
     io.to(roomCode).emit('diceResult', {
