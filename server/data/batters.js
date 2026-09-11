@@ -61,4 +61,7 @@ const BATTERS = [
 
 BATTERS.forEach(b=>{if(!b.deg)b.deg=genDeg(b.ba,b.obp,b.slg)});
 
-module.exports = { BATTERS };
+const OUTCOME_KEYS = ['1B','2B','3B','HR','BB','HBP','SO','FO','GO'];
+
+module.exports = { BATTERS, OUTCOME_KEYS };
+
