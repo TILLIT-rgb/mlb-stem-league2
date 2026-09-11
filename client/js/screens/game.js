@@ -92,10 +92,18 @@ function renderDefensePhase(gs) {
           <div class="dice-result-text" id="diceResultText">${gs.diceDone ? `${gs.diceVals[0]} ${gs.diceOp === 'mul' ? '×' : '+'} ${gs.diceVals[1]} = ${gs.diceResult}` : ''}</div>
         </div>
         <div class="dice-btns" id="diceBtns">
-          ${isFieldingTeam && !gs.diceDone ? `
+          ${isFieldingTeam && !gs.diceDone ? (gs.manualDice ? `
+          <div style="font-size:.85em;color:var(--dim);margin-bottom:6px">Type the two numbers you rolled, then pick × or +:</div>
+          <div style="display:flex;gap:10px;justify-content:center;align-items:center;margin-bottom:8px">
+            <input id="manualDie0" type="number" inputmode="numeric" placeholder="?" style="width:56px;height:48px;font-size:1.4em;text-align:center;border-radius:8px;border:2px solid #2a3a55;background:var(--slate);color:#fff">
+            <input id="manualDie1" type="number" inputmode="numeric" placeholder="?" style="width:56px;height:48px;font-size:1.4em;text-align:center;border-radius:8px;border:2px solid #2a3a55;background:var(--slate);color:#fff">
+          </div>
+          <button class="btn-blue" onclick="emitManualRoll('mul')">× Multiply</button>
+          <button class="btn-red" onclick="emitManualRoll('add')">+ Add</button>
+          ` : `
           <button class="btn-blue" onclick="emitRollDice('mul')">Roll × Multiply</button>
           <button class="btn-red" onclick="emitRollDice('add')">Roll + Add</button>
-          ` : ''}
+          `) : ''}
           ${!isFieldingTeam && !gs.diceDone ? '<div style="color:var(--dim)">Waiting for opponent to roll...</div>' : ''}
         </div>
       </div>
@@ -153,6 +161,16 @@ function emitSpin() {
 
 function emitRollDice(op) {
   socket.emit('rollDice', { roomCode: clientState.roomCode, operation: op });
+  document.getElementById('diceBtns').innerHTML = '';
+}
+
+function emitManualRoll(op) {
+  const e0 = document.getElementById('manualDie0');
+  const e1 = document.getElementById('manualDie1');
+  const v0 = parseInt(e0 && e0.value, 10);
+  const v1 = parseInt(e1 && e1.value, 10);
+  if (isNaN(v0) || isNaN(v1)) { alert('Type both dice numbers first!'); return; }
+  socket.emit('rollDice', { roomCode: clientState.roomCode, operation: op, dice: [v0, v1] });
   document.getElementById('diceBtns').innerHTML = '';
 }
 
