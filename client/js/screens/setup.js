@@ -11,6 +11,15 @@ function createRoom() {
   socket.emit('createRoom', { teamName });
 }
 
+function createManualRoom() {
+  if (!socket || !socket.connected) {
+    alert(t('alert_connecting'));
+    return;
+  }
+  const teamName = document.getElementById('t1name').value || t('team1');
+  socket.emit('createRoom', { teamName, manualDice: true });
+}
+
 function createDerbyRoom() {
   if (!socket || !socket.connected) {
     alert(t('alert_connecting'));
