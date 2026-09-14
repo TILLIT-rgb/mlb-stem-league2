@@ -73,7 +73,7 @@ function avatarHTML(name, size) {
   const src = `assets/faces/${faceSlug(name)}.png`;  // change .png to .jpg here if your files are JPGs
   return `<span style="position:relative;display:inline-block;width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;flex-shrink:0;vertical-align:middle">`
        + `<span style="position:absolute;inset:0">${svg}</span>`
-       + `<img src="${src}" alt="${name}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">`
+       + `<img src="${src}" alt="${name}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">`
        + `</span>`;
 }
 
