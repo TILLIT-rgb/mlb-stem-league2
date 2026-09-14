@@ -32,11 +32,9 @@ function updateDraftUI(draftState) {
   const team = draftState.currentTeam;
   const tname = draftState.teams[team].name;
   const isMyTurn = clientState.playerSlot === team;
-
   document.getElementById('draftTurn').innerHTML =
     `<span class="tn" style="color:${team === 0 ? 'var(--blue)' : 'var(--red)'}">${tname}</span>${fmtPick('')}${isMyTurn ? t('you_caps') : ''}`;
   document.getElementById('draftPicksLeft').textContent = fmtPicksLeft(draftState.picksLeftInBlock);
-
   // Render rosters
   let rhtml = '';
   for (let ti = 0; ti < 2; ti++) {
@@ -54,11 +52,9 @@ function updateDraftUI(draftState) {
     rhtml += `</div></div>`;
   }
   document.getElementById('draftRosters').innerHTML = rhtml;
-
   // Store draft state for pool rendering
   clientState.draftState = draftState;
   updateDraftPool();
-
   const allDone = draftState.isComplete;
   const ddb = document.getElementById('draftDoneBtn');
   if (ddb) ddb.disabled = !allDone;
@@ -82,7 +78,6 @@ function updateDraftPool() {
   if (!ds) return;
   const team = ds.currentTeam;
   const isMyTurn = clientState.playerSlot === team;
-
   if (clientState.poolType === 'bat') {
     const positions = ['ALL', 'C', '1B', '2B', '3B', 'SS', 'OF', 'DH'];
     document.getElementById('filterBar').innerHTML = positions.map(p =>
@@ -92,17 +87,21 @@ function updateDraftPool() {
   } else {
     document.getElementById('filterBar').style.display = 'none';
   }
-
   const allBatters = new Set([...ds.teams[0].batters, ...ds.teams[1].batters]);
   const allPitchers = new Set([...ds.teams[0].pitchers, ...ds.teams[1].pitchers]);
-
   let html = '';
   if (clientState.poolType === 'bat') {
     const teamFull = ds.teams[team].batters.length >= 9;
+    const entries = [];
     BATTERS.forEach((b, i) => {
       if (clientState.posFilter !== 'ALL' && !b.p.includes(clientState.posFilter)) return;
       const isPicked = allBatters.has(i);
       const locked = !isPicked && !teamFull && isMyTurn && isBatterLockedClient(ds.teams, team, i);
+      const rank = isPicked ? 2 : (locked ? 1 : 0);
+      entries.push({ b, i, isPicked, locked, rank });
+    });
+    entries.sort((a, z) => a.rank - z.rank);
+    entries.forEach(({ b, i, isPicked, locked }) => {
       html += `<div class="pcard ${isPicked ? 'picked' : ''} ${locked ? 'locked' : ''}" ${!isPicked && !locked && !teamFull && isMyTurn ? `onclick="emitDraftPick(${i},'bat')"` : ''}>
         <div class="locked-label">${t('position_filled')}</div>
         <div class="pcard-header">${avatarHTML(nm(b), 40)}<div><div class="pname">${nm(b)}</div><div class="ppos">${b.p.join(' / ')}</div></div></div>
@@ -111,8 +110,13 @@ function updateDraftPool() {
     });
   } else {
     const teamFull = ds.teams[team].pitchers.length >= 3;
+    const entries = [];
     PITCHERS.forEach((p, i) => {
       const isPicked = allPitchers.has(i);
+      entries.push({ p, i, isPicked, rank: isPicked ? 1 : 0 });
+    });
+    entries.sort((a, z) => a.rank - z.rank);
+    entries.forEach(({ p, i, isPicked }) => {
       html += `<div class="pcard ${isPicked ? 'picked' : ''}" ${!isPicked && !teamFull && isMyTurn ? `onclick="emitDraftPick(${i},'pitch')"` : ''}>
         <div class="pcard-header">${avatarHTML(nm(p), 40)}<div><div class="pname">${nm(p)}</div><div class="ppos">${t('pitcher')}</div></div></div>
         <div class="pitch-nums"><div><span class="pn-label">${t('multiply')}</span><div class="pn-vals">${p.mul.map(v => `<span class="pn-chip mul">${v}</span>`).join('')}</div></div>
@@ -120,7 +124,6 @@ function updateDraftPool() {
     });
   }
   document.getElementById('poolGrid').innerHTML = html;
-
   if (clientState.poolType === 'bat') {
     BATTERS.forEach((b, i) => {
       const c = document.getElementById('mw' + i);
