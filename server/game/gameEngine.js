@@ -64,12 +64,10 @@ function spinWheel(gs) {
   gs.spinDone = true;
   gs.outsBeforePlay = gs.outs;
   gs.lastWCWasSteal = false;
-
   // Calculate wheel animation data
   let mid = 0;
   for (let i = 0; i < chosen; i++) mid += b.deg[i];
   mid += b.deg[chosen] / 2;
-
   return {
     outcome: OUTCOME_KEYS[chosen],
     outcomeIdx: chosen,
@@ -86,12 +84,10 @@ function rollDice(gs, op, dice) {
   gs.diceVals = [v0, v1];
   gs.diceResult = op === 'mul' ? v0 * v1 : v0 + v1;
   gs.diceDone = true;
-
   const pi = currentPitcher(gs);
   const p = PITCHERS[pi];
   const nums = op === 'mul' ? p.mul : p.add;
   const matched = nums.includes(gs.diceResult);
-
   return {
     dice: [v0, v1],
     op,
@@ -112,11 +108,30 @@ function shiftOutcome(gs, dir) {
   }
 }
 
+// Advance to the next batter and reset for a fresh plate appearance
+// (or end the half-inning if that was the 3rd out).
+function advanceBatter(gs) {
+  const bt = battingTeam(gs);
+  gs.batterIdx[bt] = (gs.batterIdx[bt] + 1) % gs.teams[bt].lineup.length;
+  if (gs.outs >= 3) {
+    endHalfInning(gs);
+  } else {
+    gs.phase = 'offense';
+    gs.spinDone = false;
+    gs.lastResult = null;
+    gs.lastWCWasSteal = false;
+    gs.diceDone = false;
+    gs.diceVals = [null, null];
+    gs.diceOp = null;
+    gs.diceResult = null;
+    gs.shiftDone = false;
+  }
+}
+
 function applyResult(gs) {
   const result = gs.lastResult;
   const bt = battingTeam(gs);
   let runsScored = 0;
-
   if (result === 'HR') {
     runsScored = 1 + (gs.bases[0] ? 1 : 0) + (gs.bases[1] ? 1 : 0) + (gs.bases[2] ? 1 : 0);
     gs.bases = [false, false, false];
@@ -153,10 +168,8 @@ function applyResult(gs) {
     gs.bases[2] = r2; gs.bases[1] = r1; gs.bases[0] = false;
     gs.outs++;
   }
-
   gs.score[bt] += runsScored;
   gs.batterIdx[bt] = (gs.batterIdx[bt] + 1) % gs.teams[bt].lineup.length;
-
   if (gs.outs >= 3) {
     endHalfInning(gs);
   } else {
@@ -170,7 +183,6 @@ function applyResult(gs) {
     gs.diceResult = null;
     gs.shiftDone = false;
   }
-
   return { runsScored };
 }
 
@@ -178,13 +190,11 @@ function endHalfInning(gs) {
   const bt = battingTeam(gs);
   const prevRuns = gs.inningScores[bt].reduce((a, c) => a + c, 0);
   gs.inningScores[bt][gs.inning - 1] = gs.score[bt] - prevRuns;
-
   // Walk-off check
   if (gs.half === 1 && gs.inning >= 9 && gs.score[1] > gs.score[0]) {
     gs.gameOver = true;
     return;
   }
-
   if (gs.half === 0) {
     gs.half = 1;
   } else {
@@ -196,7 +206,6 @@ function endHalfInning(gs) {
     gs.half = 0;
     gs.teams.forEach(t => t.wc.push(randomWC()));
   }
-
   gs.outs = 0;
   gs.bases = [false, false, false];
   gs.phase = 'offense';
@@ -215,15 +224,12 @@ function playWildCard(gs, teamIdx, cardIdx, timing) {
   if (wi === undefined) return { valid: false, reason: 'No card at index' };
   const wc = WILD_CARD_DEFS[wi];
   if (!wc.canPlay(gs, timing)) return { valid: false, reason: 'Card cannot be played now' };
-
   // Verify correct team timing
   const isMyTiming = (wc.type === 'bat' && teamIdx === battingTeam(gs)) ||
-                     (wc.type === 'pitch' && teamIdx === fieldingTeam(gs));
+    (wc.type === 'pitch' && teamIdx === fieldingTeam(gs));
   if (!isMyTiming) return { valid: false, reason: 'Not your timing' };
-
   gs.teams[teamIdx].wc.splice(cardIdx, 1);
   applyWCEffect(gs, wc);
-
   return { valid: true, card: wc };
 }
 
@@ -251,12 +257,10 @@ function applyWCEffect(gs, wc) {
       gs.outs++;
       if (gs.bases[2]) gs.score[bt]++;
       gs.bases[2] = gs.bases[1]; gs.bases[1] = gs.bases[0]; gs.bases[0] = false;
-      if (gs.outs >= 3) endHalfInning(gs);
       break;
     case 'Suicide Squeeze':
       gs.outs++;
       if (gs.bases[2]) { gs.score[bt]++; gs.bases[2] = false; }
-      if (gs.outs >= 3) endHalfInning(gs);
       break;
     case "Catcher's Interference": case 'Intentional Walk':
       if (gs.bases[0] && gs.bases[1] && gs.bases[2]) gs.score[bt]++;
@@ -297,6 +301,10 @@ function applyWCEffect(gs, wc) {
       else if (gs.bases[0]) { gs.bases[0] = false; gs.outs++; }
       if (gs.outs >= 3) endHalfInning(gs);
       break;
+  }
+  // These cards resolve the batter's plate appearance: advance to the next batter (no spin).
+  if (["Sacrifice Bunt", "Suicide Squeeze", "Catcher's Interference", "Intentional Walk"].includes(wc.name)) {
+    advanceBatter(gs);
   }
 }
 
