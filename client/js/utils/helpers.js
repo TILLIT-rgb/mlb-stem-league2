@@ -72,8 +72,8 @@ function avatarHTML(name, size) {
   const svg = generatedFaceSVG(name, size);
   const src = `assets/faces/${faceSlug(name)}.png`;  // change .png to .jpg here if your files are JPGs
   return `<span style="position:relative;display:inline-block;width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;flex-shrink:0;vertical-align:middle">`
-       + `<span style="position:absolute;inset:0">${svg}</span>`
-       + `<img src="${src}" alt="${name}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">`
+       + `<span style="position:absolute;inset:0;display:none">${svg}</span>`
+       + `<img src="${src}" alt="${name}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';var c=this.previousElementSibling;if(c)c.style.display='block';">`
        + `</span>`;
 }
 
