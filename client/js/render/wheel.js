@@ -2,7 +2,8 @@ function drawMiniWheel(canvas, deg) {
   const ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height, cx = w / 2, cy = h / 2, r = Math.min(cx, cy) - 2;
   ctx.clearRect(0, 0, w, h);
   let start = -Math.PI / 2;
-  deg.forEach((d, i) => {
+  WHEEL_SEQ.forEach((i) => {
+    const d = deg[i];
     if (d <= 0) return;
     const angle = d * Math.PI / 180;
     ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, start, start + angle); ctx.closePath();
@@ -18,7 +19,8 @@ function drawGameWheel(canvasId, deg) {
   const ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height, cx = w / 2, cy = h / 2, r = Math.min(cx, cy) - 4;
   ctx.clearRect(0, 0, w, h);
   let start = -Math.PI / 2;
-  deg.forEach((d, i) => {
+  WHEEL_SEQ.forEach((i) => {
+    const d = deg[i];
     if (d <= 0) return;
     const angle = d * Math.PI / 180;
     ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, start, start + angle); ctx.closePath();
