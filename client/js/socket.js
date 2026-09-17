@@ -138,7 +138,7 @@ function initSocket() {
     }, 3200);
   });
 
-  socket.on('diceResult', (data) => {
+  socket.on('diceResult', (data) => {     clientState.mathSolved = false;
     clientState.gameState = data.gameState;
     const d0 = document.getElementById('die0');
     const d1 = document.getElementById('die1');
@@ -157,7 +157,7 @@ function initSocket() {
         if (d1) { d1.textContent = data.dice[1]; d1.classList.remove('rolling'); }
         document.getElementById('diceResultText').textContent =
           `${data.dice[0]} ${data.op === 'mul' ? '×' : '+'} ${data.dice[1]} = ${data.result}`;
-        handleDiceResult(data);
+        renderGamePhase();
       }
     }, 80);
   });
