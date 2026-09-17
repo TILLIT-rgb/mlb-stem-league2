@@ -165,7 +165,7 @@ function initSocket() {
   function handleDiceResult(data) {
     if (data.matched) {
       const ci = clientState.gameState.lastResultIdx;
-      const leftIdx = ci > 0 ? ci - 1 : OUTCOME_KEYS.length - 1;
+      const leftIdx = WHEEL_SEQ[(WHEEL_SEQ.indexOf(ci) - 1 + WHEEL_SEQ.length) % WHEEL_SEQ.length];
       const rightIdx = WHEEL_SEQ[(WHEEL_SEQ.indexOf(ci) + 1) % WHEEL_SEQ.length];
       const ft = 1 - clientState.gameState.half;
       const isFielding = clientState.playerSlot === ft;
