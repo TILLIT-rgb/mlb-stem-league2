@@ -95,7 +95,7 @@ function renderDefensePhase(gs) {
           ${isFieldingTeam && !gs.diceDone ? (gs.manualDice ? `
           <div style="font-size:.85em;color:var(--dim);margin-bottom:6px">Type the two numbers you rolled, then pick × or +:</div>
           <div style="display:flex;gap:10px;justify-content:center;align-items:center;margin-bottom:8px">
-            <input id="manualDie0" type="number" inputmode="numeric" placeholder="?" style="width:56px;height:48px;font-size:1.4em;text-align:center;border-radius:8px;border:2px solid #2a3a55;background:var(--slate);color:#fff">
+            <input id="manualDie0" type="number" inputmode="numeric" placeholder="?" style="width:66px;height:56px;padding:4px;font-size:1.6em;font-weight:700;text-align:center;border-radius:8px;border:2px solid var(--gold);background:#fff;color:#111">
             <input id="manualDie1" type="number" inputmode="numeric" placeholder="?" style="width:56px;height:48px;font-size:1.4em;text-align:center;border-radius:8px;border:2px solid #2a3a55;background:var(--slate);color:#fff">
           </div>
           <button class="btn-blue" onclick="emitManualRoll('mul')">× Multiply</button>
