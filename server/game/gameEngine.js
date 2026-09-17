@@ -1,6 +1,6 @@
 const { BATTERS, OUTCOME_KEYS } = require('../data/batters');
 const { PITCHERS } = require('../data/pitchers');
-const { WILD_CARD_DEFS } = require('../data/wildcards');
+const { WILD_CARD_DEFS } = require('../data/wildcards'); const WHEEL_SEQ = [0,1,6,2,3,7,4,5,8];
 
 function initGameState(teams) {
   return {
@@ -100,7 +100,7 @@ function shiftOutcome(gs, dir) {
   if (gs.shiftDone) return;
   gs.shiftDone = true;
   if (dir !== 0) {
-    let ni = gs.lastResultIdx + dir;
+    const pos = WHEEL_SEQ.indexOf(gs.lastResultIdx); let ni = WHEEL_SEQ[(pos + dir + WHEEL_SEQ.length) % WHEEL_SEQ.length];
     if (ni < 0) ni = OUTCOME_KEYS.length - 1;
     if (ni >= OUTCOME_KEYS.length) ni = 0;
     gs.lastResult = OUTCOME_KEYS[ni];
