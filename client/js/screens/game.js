@@ -69,7 +69,7 @@ function renderDefensePhase(gs) {
   const ft = 1 - gs.half;
   const pi = gs.teams[ft].pitchers[gs.teams[ft].activePitcher];
   const p = PITCHERS[pi];
-  const isFieldingTeam = clientState.playerSlot === ft;
+  const isFieldingTeam = clientState.playerSlot === ft;   const needMath = isFieldingTeam && !gs.manualDice && gs.diceDone && !clientState.mathSolved;
   let wcHtml = renderWCHand(gs, ft, 'post', WILD_CARD_DEFS, BATTERS, PITCHERS);
   document.getElementById('gamePhase').innerHTML = `
     <div class="phase-panel">
@@ -89,7 +89,7 @@ function renderDefensePhase(gs) {
           <div class="die" id="die0">${gs.diceVals[0] !== null ? gs.diceVals[0] : '?'}</div>
           <div class="dice-op" id="diceOpDisplay">${gs.diceOp === 'mul' ? '×' : gs.diceOp === 'add' ? '+' : ''}</div>
           <div class="die" id="die1">${gs.diceVals[1] !== null ? gs.diceVals[1] : '?'}</div>
-          <div class="dice-result-text" id="diceResultText">${gs.diceDone ? `${gs.diceVals[0]} ${gs.diceOp === 'mul' ? '×' : '+'} ${gs.diceVals[1]} = ${gs.diceResult}` : ''}</div>
+          <div class="dice-result-text" id="diceResultText">${gs.diceDone ? `${gs.diceVals[0]} ${gs.diceOp === 'mul' ? '×' : '+'} ${gs.diceVals[1]} = ${needMath ? '?' : gs.diceResult}` : ''}</div>
         </div>
         <div class="dice-btns" id="diceBtns">
           ${isFieldingTeam && !gs.diceDone ? (gs.manualDice ? `
@@ -115,7 +115,7 @@ function renderDefensePhase(gs) {
   if (gs.diceDone) {
     const nums = gs.diceOp === 'mul' ? p.mul : p.add;
     const matched = nums.includes(gs.diceResult);
-    if (matched && !gs.shiftDone) {
+    if (needMath) { renderMathGate(gs); } else if (matched && !gs.shiftDone) {
       const ci = gs.lastResultIdx;
       const leftIdx = WHEEL_SEQ[(WHEEL_SEQ.indexOf(ci) - 1 + WHEEL_SEQ.length) % WHEEL_SEQ.length];
       const rightIdx = WHEEL_SEQ[(WHEEL_SEQ.indexOf(ci) + 1) % WHEEL_SEQ.length];
@@ -210,4 +210,31 @@ function showWCAnimation(wc) {
     <div class="wpc-desc">${wc.desc}</div>`;
   ol.classList.remove('show'); void ol.offsetHeight; ol.classList.add('show');
   setTimeout(() => ol.classList.remove('show'), 1000);
+  function renderMathGate(gs) {
+  const sa = document.getElementById('shiftArea');
+  if (!sa) return;
+  const opSym = gs.diceOp === 'mul' ? '×' : '+';
+  sa.innerHTML =
+    '<div style="text-align:center;margin:10px 0">' +
+    '<div style="color:var(--gold);font-weight:700;margin-bottom:8px">Solve it! What is ' + gs.diceVals[0] + ' ' + opSym + ' ' + gs.diceVals[1] + '?</div>' +
+    '<input id="mathAns" type="number" inputmode="numeric" placeholder="?" style="width:90px;height:52px;padding:4px;font-size:1.6em;font-weight:700;text-align:center;border-radius:8px;border:2px solid var(--gold);background:#fff;color:#111">' +
+    '<button class="btn-gold" onclick="checkMathAnswer()" style="margin-left:8px">Check</button>' +
+    '<div id="mathFeedback" style="color:var(--red);font-size:.9em;margin-top:8px;min-height:1em"></div>' +
+    '</div>';
+}
+
+function checkMathAnswer() {
+  const gs = clientState.gameState;
+  const el = document.getElementById('mathAns');
+  const val = parseInt(el && el.value, 10);
+  if (val === gs.diceResult) {
+    clientState.mathSolved = true;
+    renderGamePhase();
+  } else {
+    const fb = document.getElementById('mathFeedback');
+    if (fb) fb.textContent = 'Not quite - try again!';
+    if (el) { el.value = ''; el.focus(); }
+  }
+}
+
 }
