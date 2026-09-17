@@ -117,8 +117,8 @@ function renderDefensePhase(gs) {
     const matched = nums.includes(gs.diceResult);
     if (matched && !gs.shiftDone) {
       const ci = gs.lastResultIdx;
-      const leftIdx = ci > 0 ? ci - 1 : OUTCOME_KEYS.length - 1;
-      const rightIdx = ci < OUTCOME_KEYS.length - 1 ? ci + 1 : 0;
+      const leftIdx = WHEEL_SEQ[(WHEEL_SEQ.indexOf(ci) - 1 + WHEEL_SEQ.length) % WHEEL_SEQ.length];
+      const rightIdx = WHEEL_SEQ[(WHEEL_SEQ.indexOf(ci) + 1) % WHEEL_SEQ.length];
       const sa = document.getElementById('shiftArea');
       if (sa) sa.innerHTML = isFieldingTeam
         ? `<div style="text-align:center;color:var(--gold);font-weight:700;margin-bottom:6px">Match! Choose shift direction:</div>
