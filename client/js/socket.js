@@ -108,7 +108,7 @@ function initSocket() {
     const b = data.batter;
     if (b && b.deg) {
       let mid = 0;
-      for (let i = 0; i < data.outcomeIdx; i++) mid += b.deg[i];
+      const pos = WHEEL_SEQ.indexOf(data.outcomeIdx); for (let p = 0; p < pos; p++) mid += b.deg[WHEEL_SEQ[p]];
       mid += b.deg[data.outcomeIdx] / 2;
       const targetMod = (360 - mid) % 360;
       const currentMod = clientState.wheelRot % 360;
